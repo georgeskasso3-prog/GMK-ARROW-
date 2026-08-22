@@ -17,7 +17,7 @@ app.get('/',(req,res)=>{
 });
 app.post('/post',(req,res)=>{
   const posts=JSON.parse(fs.readFileSync('posts.json'));
-  posts.push({author:req.query.user||'Anonyme',message:req.body.message,date:new Date().toLocaleString()});
+  posts.push({author:req.query.user||'Georges-Marie Kasso-Fondateur',message:req.body.message,date:new Date().toLocaleString()});
   fs.writeFileSync('posts.json',JSON.stringify(posts,null,2));
   res.redirect('/?user='+(req.query.user||''));
 });
