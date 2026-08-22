@@ -1,38 +1,68 @@
 const express = require('express');
-const path = require('path');
 const fs = require('fs');
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(__dirname));
 if (!fs.existsSync('users.json')) fs.writeFileSync('users.json', '[]');
 if (!fs.existsSync('posts.json')) fs.writeFileSync('posts.json', '[]');
-function menu(u){return `<div style="background:#0a1931;padding:15px;display:flex;gap:20px;position:sticky;top:0;z-index:99;border-bottom:2px solid #c5a86a"><b style="color:#c5a86a;letter-spacing:2px">GMK ARROW</b><a href="/?user=${u||''}" style="color:white;text-decoration:none">Accueil</a><a href="/users?user=${u||''}" style="color:white;text-decoration:none">Utilisateurs</a><a href="/register" style="color:#c5a86a;text-decoration:none">Inscription</a><span style="margin-left:auto;color:#aaa">${u||'Invité'}</span></div>`}
+function menu(u){
+ return `<div style="background:#0a1931;padding:10px 15px;display:flex;align-items:center;gap:15px;position:sticky;top:0;z-index:100;border-bottom:2px solid #c5a86a">
+  <a href="/?user=${u||''}" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+    <img src="/logo.jpeg" style="width:45px;height:45px;border-radius:8px;object-fit:cover">
+    <span style="color:#c5a86a;font-weight:bold;font-size:18px">GMK ARROW</span>
+  </a>
+   <a href="/?user=${u||''}" style="color:white;text-decoration:none;margin-left:20px">Fil</a>
+  ${u?`<span style="margin-left:auto;color:#c5a86a;display:flex;align-items:center;gap:8px"><div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#c5a86a,#f0d27a);color:#0a1931;display:flex;align-items:center;justify-content:center;font-weight:bold;border:2px solid #c5a86a">${u[0].toUpperCase()}</div>${u} 👑</span>`:''}
+ </div>`;
+}
 app.get('/',(req,res)=>{
   const posts=JSON.parse(fs.readFileSync('posts.json'));
-  const user=req.query.user||'';
-  let feed=posts.slice().reverse().map(p=>`<div style="background:#112240;border:1px solid #c5a86a;padding:15px;margin:12px 0;border-radius:12px"><div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;background:#c5a86a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#0a1931">T</div><b style="color:white">${p.author}</b><small style="color:#aaa;margin-left:10px">${p.date}</small></div><p style="color:white;margin:15px 0">${p.message}</p><button style="background:#c5a86a;color:#0a1931;border:none;padding:8px 15px;border-radius:8px;font-weight:bold">Répondre en Arrow</button></div>`).join('');
-  res.send(`${menu(user)}<div style="background:#0a1931;min-height:100vh;padding:20px"><div style="max-width:700px;margin:0 auto"><div 
-  style="background:#112240;padding:20px;border-radius:12px;border:1px solid #c5a86a"><h2 style="color:white">Bienvenue ${user||'Chef'} !</h2><form method="POST" action="/post?user=${user}"><textarea name="message" required style="width:100%;height:70px;background:#0a1931;color:white;border:1px solid #c5a86a;border-radius:8px;padding:10px" placeholder="Quoi de neuf?"></textarea><br><br><button style="background:#c5a86a;color:#0a1931;padding:12px 25px;border:none;border-radius:8px;font-weight:bold;width:100%">ENVOYER ARROW</button></form></div><h3 style="color:#c5a86a;text-align:center;margin:20px 0">Fil d actualite</h3>${feed||'<p style="color:white;text-align:center">Pas encore de post</p>'}</div></div>`);
+  const user=req.query.user||'Georges-Marie Kasso-Fondateur';
+  let feed=posts.slice().reverse().map(p=>`
+    <div style="background:#112240;border:1px solid #c5a86a33;padding:15px;border-radius:16px;margin-bottom:15px;display:flex;gap:12px">
+      <div style="width:48px;height:48px;min-width:48px;border-radius:50%;background:${p.author.includes('Fondateur')?'linear-gradient(135deg,#c5a86a,#f0d27a)':'#233a5e'};color:${p.author.includes('Fondateur')?'#0a1931':'white'};display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;border:2px solid #c5a86a;overflow:hidden">${p.author[0].toUpperCase()}</div>
+      <div style="flex:1">
+      <div style="font-weight:bold;color:${p.author.includes('Fondateur')?'#c5a86a':'white'}">${p.author} ${p.author.includes('Fondateur')?'👑 Fondateur':''}</div>
+        <div style="color:#8892b0;font-size:11px">${new Date(p.date).toLocaleString()}</div>
+        <div style="color:white;margin-top:8px;line-height:1.4">${p.message}</div>
+      </div>
+    </div>`).join('');
+  res.send(`${menu(user)}<div style="background:#0a1931;min-height:100vh;padding:20px"><div style="max-width:600px;margin:auto">
+    <div style="background:#112240;padding:20px;border-radius:16px;border:1px solid #c5a86a;margin-bottom:20px">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+              <div style="width:45px;height:45px;border-radius:50%;background:linear-gradient(135deg,#c5a86a,#f0d27a);display:flex;align-items:center;justify-content:center;font-weight:bold;color:#0a1931">${user[0].toUpperCase()}</div>
+        <span style="color:white;font-weight:bold">${user}</span>
+      </div>
+      <form action="/post?user=${user}" method="POST">
+        <textarea name="message" placeholder="Quoi de neuf Chef?" style="width:100%;height:80px;background:#0a1931;border:1px solid #c5a86a55;color:white;padding:12px;border-radius:12px;outline:none"></textarea>
+        <button style="margin-top:10px;background:#c5a86a;color:#0a1931;border:none;padding:12px 22px;border-radius:20px;font-weight:bold;cursor:pointer">🏹 Envoyer ARROW</button>
+      </form>
+    </div>
+    ${feed}
+  </div></div>`);
 });
+
 app.post('/post',(req,res)=>{
   const posts=JSON.parse(fs.readFileSync('posts.json'));
-  posts.push({author:req.query.user||'Georges-Marie Kasso-Fondateur',message:req.body.message,date:new Date().toLocaleString()});
-  fs.writeFileSync('posts.json',JSON.stringify(posts,null,2));
-  res.redirect('/?user='+(req.query.user||''));
+  posts.push({author:req.query.user||'Georges-Marie Kasso-Fondateur',message:req.body.message,date:new Date()});
+  fs.writeFileSync('posts.json',JSON.stringify(posts));
+  res.redirect('/?user='+(req.query.user||'Georges-Marie Kasso-Fondateur'));
 });
-app.get('/register',(req,res)=>res.sendFile(path.join(__dirname,'public','register.html')));
+app.get('/register',(req,res)=>{
+  res.send(`${menu('')}<div style="background:#0a1931;min-height:100vh;padding:40px"><div style="max-width:400px;margin:auto;background:#112240;padding:25px;border-radius:16px;border:1px solid #c5a86a;text-align:center">
+  <img src="/logo.jpeg" style="width:80px;border-radius:12px"><h2 style="color:#c5a86a">Rejoindre GMK ARROW</h2><p style="color:#8892b0">La Nouvelle vision de la communication communautaire</p>
+  <form action="/register" method="POST">
+    <input name="name" placeholder="Nom complet" required style="width:100%;padding:12px;margin:8px 0;background:#0a1931;border:1px solid #c5a86a;color:white;border-radius:8px">
+    <input name="email" placeholder="Email" required style="width:100%;padding:12px;margin:8px 0;background:#0a1931;border:1px solid #c5a86a;color:white;border-radius:8px">
+    <button 
+    style="width:100%;background:#c5a86a;color:#0a1931;padding:12px;border:none;border-radius:20px;font-weight:bold;margin-top:10px">S'inscrire</button>
+  </form></div></div>`);  
+});
 app.post('/register',(req,res)=>{
   const users=JSON.parse(fs.readFileSync('users.json'));
-  users.push({id:Date.now(),name:req.body.name,email:req.body.email,telephone:req.body.telephone,password:req.body.password,date:new Date().toLocaleString()});
-fs.writeFileSync('users.json',JSON.stringify(users,null,2));
+  users.push(req.body);
+  fs.writeFileSync('users.json',JSON.stringify(users));
   res.redirect('/?user='+encodeURIComponent(req.body.name));
 });
-app.get('/users',(req,res)=>{
-  const users=JSON.parse(fs.readFileSync('users.json'));
-  const user=req.query.user||'';
-  let list=users.map(u=>`<div style="background:#112240;border:1px solid #c5a86a;padding:10px;margin:5px 0;border-radius:8px;color:white"><b style="color:#c5a86a">${u.name}</b> - ${u.email} - ${u.telephone}</div>`).join('');
-  res.send(`${menu(user)}<div style="background:#0a1931;min-height:100vh;padding:20px"><div style="max-width:700px;margin:0 auto"><h2 style="color:#c5a86a">Communauté GMK ARROW (${users.length})</h2>${list}</div></div>`);
-});
-const PORT=process.env.PORT||3000;
-app.listen(PORT,'0.0.0.0',()=>console.log('GMK ARROW BLEU MARINE ET OR sur '+PORT));
+app.listen(process.env.PORT||3000,()=>console.log('GMK ARROW READY'));
