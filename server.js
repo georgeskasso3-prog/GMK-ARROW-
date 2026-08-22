@@ -7,14 +7,17 @@ app.use(express.static(__dirname));
 if (!fs.existsSync('users.json')) fs.writeFileSync('users.json', '[]');
 if (!fs.existsSync('posts.json')) fs.writeFileSync('posts.json', '[]');
 function menu(u){
- return `<div style="background:#0a1931;padding:10px 15px;display:flex;align-items:center;gap:15px;position:sticky;top:0;z-index:100;border-bottom:2px solid #c5a86a">
-  <a href="/?user=${u||''}" style="display:flex;align-items:center;gap:10px;text-decoration:none">
-    <div style="width:45px;height:45px;background:#c5a86a;color:#0a1931;display:flex;align-items:center;justify-content:center;font-weight:bold;border-radius:8px;font-size:22px">G</div>
-    <span style="color:#c5a86a;font-weight:bold;font-size:18px">GMK ARROW</span>
-  </a>
-   <a href="/?user=${u||''}" style="color:white;text-decoration:none;margin-left:20px">Fil</a>
-  ${u?`<span style="margin-left:auto;color:#c5a86a;display:flex;align-items:center;gap:8px"><div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#c5a86a,#f0d27a);color:#0a1931;display:flex;align-items:center;justify-content:center;font-weight:bold;border:2px solid #c5a86a">${u[0].toUpperCase()}</div>${u} 👑</span>`:''}
- </div>`;
+return `<div style="background:#0a1931;padding:18px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
+<a href="/?user=${u||''}" style="display:flex;align-items:center;gap:12px;text-decoration:none">
+<div style="width:55px;height:55px;background:#c5a86a;color:#0a1931;display:flex;align-items:center;justify-content:center;font-weight:bold;border-radius:12px;font-size:28px">G</div>
+<span style="color:#c5a86a;font-weight:bold;font-size:22px">GMK ARROW</span>
+</a>
+<div style="display:flex;align-items:center;gap:15px">
+<a href="/?user=${u||''}" 
+style="color:white;text-decoration:none;font-size:18px;font-weight:bold">Fil</a>
+${u?`<a href="/profil?user=${u}" style="color:white;text-decoration:none;display:flex;align-items:center;gap:8px;font-size:15px"><div style="width:42px;height:42px;background:#c5a86a;color:#0a1931;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold">G</div> ${u.split('-')[0]}</a>`:''}
+</div>
+</div>`;
 }
 app.get('/',(req,res)=>{
   const posts=JSON.parse(fs.readFileSync('posts.json'));
