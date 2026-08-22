@@ -110,8 +110,10 @@ app.get('/dashboard', (req, res) => {
       if(dParts.length===3){
         let m = parseInt(dParts[1], 10);
         let y = parseInt(dParts[2], 10);
-        if(m === moisActuel) countMois++;
-        if(y === anneeActuelle) countAnnee++;
+       if(y === anneeActuelle) countAnnee++;
+if(dateStr.includes('/'+moisActuel+'/') || dateStr.includes('/0'+moisActuel+'/') || m === moisActuel){
+  countMois++;
+}
       }
     }
 
