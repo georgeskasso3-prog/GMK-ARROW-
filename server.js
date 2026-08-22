@@ -2,37 +2,108 @@ const express = require('express');
 const fs = require('fs');
 const multer = require('multer');
 const app = express();
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.json({limit: '10mb'}));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+app.use(express.json({ limit: '15mb' }));
 app.use(express.static(__dirname));
 if (!fs.existsSync('users.json')) fs.writeFileSync('users.json', '[]');
 if (!fs.existsSync('posts.json')) fs.writeFileSync('posts.json', '[]');
-const upload = multer({storage: multer.memoryStorage()});
-function getUser(name){ try{let u=JSON.parse(fs.readFileSync('users.json'));return u.find(x=>x.name===name);}catch(e){return null} }
-app.get('/reset-gmk-2024', (req,res)=>{ fs.writeFileSync('users.json','[]'); fs.writeFileSync('posts.json','[]'); res.send('<h1>RESET OK Chef!</h1><a href="/register">S inscrire</a>'); });
-function pageRegister(msg=''){return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>GMK ARROW</title></head><body style="margin:0;background:#06162e;font-family:Arial;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:15px"><div style="width:100%;max-width:400px;background:#0a1f44;border:1px solid #c5a86a;border-radius:20px;padding:25px;text-align:center"><h1 style="color:#c5a86a">GMK ARROW</h1>${msg?`<p style="color:#ff6b6b">${msg}</p>`:''}<form method="POST" action="/register" enctype="multipart/form-data"><label style="display:block;margin:15px auto;cursor:pointer"><div id="prev" style="width:90px;height:90px;border-radius:50%;background:#112240;border:2px dashed #c5a86a;margin:0 auto;display:flex;align-items:center;justify-content:center;color:#c5a86a;font-size:11px">+ Photo Profil</div><input type="file" name="photo" accept="image/*" style="display:none" 
-onchange="let r=new FileReader();r.onload=e=>{document.getElementById('prev').innerHTML='<img src='+e.target.result+' style=width:100%;height:100%;object-fit:cover;border-radius:50%>'};r.readAsDataURL(this.files[0])"></label><input name="name" placeholder="Nom Chef" required style="width:100%;padding:12px;border-radius:8px;background:#0a1931;color:white;border:1px solid #1a365d;margin-bottom:10px;box-sizing:border-box"><input name="email" type="email" placeholder="Email" required style="width:100%;padding:12px;border-radius:8px;background:#0a1931;color:white;border:1px solid #1a365d;margin-bottom:10px;box-sizing:border-box"><input name="phone" placeholder="Téléphone" required style="width:100%;padding:12px;border-radius:8px;background:#0a1931;color:white;border:1px solid #1a365d;margin-bottom:10px;box-sizing:border-box"><div style="position:relative;margin-bottom:18px"><input id="pass1" name="password" type="password" placeholder="Mot de passe" 
-required style="width:100%;padding:12px 40px 12px 12px;border-radius:8px;box-sizing:border-box"><span onclick="let i=document.getElementById('pass1'); i.type=i.type==='password'?'text':'password'; this.textContent=i.type==='password'?'👁️':'🙈'" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px">👁️</span></div><button style="width:100%;background:#c5a86a;color:#0a1931;border:none;padding:13px;border-radius:8px;font-weight:bold">S'inscrire</button></form><p style="color:#8aa0c0;font-size:13px;margin-top:15px">Déjà inscrit? <a href="/login" style="color:#c5a86a;font-weight:bold;text-decoration:none">Se connecter</a></p></div></body></html>`;}
-function menu(userName){let u=getUser(userName);let photoHtml=u&&u.photo?`<img src="${u.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #c5a86a">`:`<div style="width:44px;height:44px;background:#c5a86a;color:#0a1931;border-
-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold">${userName?userName[0]:'G'}</div>`;return `<div style="background:#0a1931;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #c5a86a;position:sticky;top:0"><a href="/?user=${userName}" style="display:flex;align-items:center;gap:10px;text-decoration:none"><span style="color:#c5a86a;font-weight:bold">GMK ARROW</span></a><a href="/profil?user=${userName}" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:white">${photoHtml}<span>${userName}</span></a></div>`;}
-app.get('/',(req,res)=>{if(!req.query.user) return res.redirect('/register');const posts=JSON.parse(fs.readFileSync('posts.json'));const cur=getUser(req.query.user);let curPhoto=cur&&cur.photo?`<img src="${cur.photo}" style="width:50px;height:50px;border-radius:50%;object-fit:cover">`:`<div style="width:50px;height:50px;background:#c5a86a;color:#0a1931;border-
-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold">${req.query.user[0]}</div>`;res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>GMK ARROW</title></head><body style="margin:0;background:#0a1931;color:white;font-family:Arial">${menu(req.query.user)}<div style="max-width:600px;margin:0 auto;padding:20px"><div style="background:#112240;border-radius:20px;padding:20px;border:1px solid #1a365d"><div style="display:flex;align-items:center;gap:12px;margin-bottom:15px">${curPhoto}<b>${req.query.user} - Chef</b></div><form method="POST" action="/post?user=${req.query.user}" enctype="multipart/form-data"><textarea name="content" placeholder="Quoi de neuf Chef? Envoyer une ARROW" style="width:100%;background:#0a1931;border:1px solid #2a4a7a;color:white;padding:16px;border-radius:12px;box-sizing:border-box" rows="3"></textarea><div style="margin-
-top:10px;display:flex;justify-content:space-between;align-items:center"><label style="color:#c5a86a;cursor:pointer">📷 Photo <input type="file" name="photo" accept="image/*" style="display:none"></label><button style="background:#c5a86a;color:#0a1931;border:none;padding:10px 22px;border-radius:25px;font-weight:bold">→ ARROW</button></div></form></div>${posts.slice().reverse().map(p=>{let pu=getUser(p.user);let pPhoto=pu&&pu.photo?`<img src="${pu.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">`:`<div style="width:40px;height:40px;background:#c5a86a;color:#0a1931;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold">${p.user[0]}</div>`;let postImg=p.photo?`<img src="${p.photo}" style="width:100%;border-radius:12px;margin-top:10px;max-height:400px;object-fit:cover">`:'';let btns=p.user===req.query.user?`<div style="margin-top:10px;display:flex;gap:10px"><a href="/edit?user=${req.query.user}&id=${p.id}" 
-style="background:#1a365d;color:#c5a86a;padding:6px 14px;border-radius:15px;text-decoration:none;font-size:12px">✏️ Modifier</a><a href="/delete?user=${req.query.user}&id=${p.id}" onclick="return confirm('Supprimer?')" style="background:#4a1a1a;color:#ff8a8a;padding:6px 14px;border-radius:15px;text-decoration:none;font-size:12px">🗑️ Supprimer</a></div>`:'';return `<div style="background:#112240;margin-top:16px;border-radius:16px;padding:16px;border:1px solid #1a365d"><div style="display:flex;align-items:center;gap:10px">${pPhoto}<b>${p.user}</b></div><p style="white-space:pre-wrap">${p.content||''}</p>${postImg}${btns}</div>`}).join('')}</div></body></html>`);});
-app.get('/register',(req,res)=>res.send(pageRegister()));
-app.get('/login',(req,res)=>res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body style="margin:0;background:#06162e;display:flex;min-height:100vh;align-items:center;justify-content:center;font-family:Arial"><div 
-style="width:100%;max-width:380px;background:#0a1f44;border:1px solid #c5a86a;border-radius:20px;padding:25px;text-align:center"><h1 style="color:#c5a86a">GMK ARROW</h1><form method="POST" action="/login"><input name="email" placeholder="Email" required style="width:100%;padding:12px;border-radius:8px;background:#0a1931;color:white;border:1px solid #1a365d;margin-bottom:10px;box-sizing:border-box"><div style="position:relative;margin-bottom:15px"><input id="pass2" name="password" type="password" placeholder="Mot de passe" required style="width:100%;padding:12px 40px 12px 12px;border-radius:8px;box-sizing:border-box"><span onclick="let i=document.getElementById('pass2'); i.type=i.type==='password'?'text':'password'; this.textContent=i.type==='password'?'👁️':'🙈'" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px">👁️</span></div><button style="width:100%;background:#c5a86a;padding:13px;border-radius:8px;font-
-weight:bold;border:none">Se connecter</button></form><p><a href="/register" style="color:#c5a86a">S'inscrire</a></p></div></body></html>`));
-app.post('/register',upload.single('photo'),(req,res)=>{let users=JSON.parse(fs.readFileSync('users.json'));if(users.find(u=>u.email===req.body.email)) return res.send(pageRegister('Email déjà utilisé!'));let photoData='';if(req.file){photoData=`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;}let newUser={name:req.body.name,email:req.body.email,phone:req.body.phone,password:req.body.password,photo:photoData};users.push(newUser);fs.writeFileSync('users.json',JSON.stringify(users));res.redirect('/?user='+req.body.name);});
-app.post('/login',(req,res)=>{let users=JSON.parse(fs.readFileSync('users.json'));let u=users.find(x=>x.email===req.body.email&&x.password===req.body.password);if(!u) return res.send('Mauvais mot de passe <a href="/login">Retour</a>');res.redirect('/?user='+u.name);});
-app.post('/post',upload.single('photo'),(req,res)=>{let posts=JSON.parse(fs.readFileSync('posts.json'));let photoData='';if(req.file){photoData=`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;}posts.push({id:Date.now().toString(),user:req.query.user,content:req.body.content,photo:photoData});fs.writeFileSync('posts.json',JSON.stringify(posts));res.redirect('/?user='+req.query.user);});
-app.get('/delete',(req,res)=>{let posts=JSON.parse(fs.readFileSync('posts.json'));posts=posts.filter(p=>p.id!==req.query.id);fs.writeFileSync('posts.json',JSON.stringify(posts));res.redirect('/?user='+req.query.user);});
-app.get('/edit',(req,res)=>{let posts=JSON.parse(fs.readFileSync('posts.json'));let p=posts.find(x=>x.id===req.query.id);if(!p) return res.redirect('/?user='+req.query.user);res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body 
-style="margin:0;background:#0a1931;color:white;font-family:Arial;padding:20px"><div style="max-width:600px;margin:0 auto"><h2 style="color:#c5a86a">Modifier votre ARROW</h2><form method="POST" action="/edit?user=${req.query.user}&id=${p.id}"><textarea name="content" style="width:100%;background:#112240;border:1px solid #2a4a7a;color:white;padding:16px;border-radius:12px;box-sizing:border-box" rows="10">${p.content}</textarea><br><br><button style="background:#c5a86a;color:#0a1931;border:none;padding:12px 25px;border-radius:25px;font-weight:bold">💾 Sauvegarder</button> <a href="/?user=${req.query.user}" style="color:#8aa0c0;margin-left:10px">Annuler</a></form></div></body></html>`);});
-app.post('/edit',(req,res)=>{let posts=JSON.parse(fs.readFileSync('posts.json'));let idx=posts.findIndex(x=>x.id===req.query.id);if(idx>=0){posts[idx].content=req.body.content;fs.writeFileSync('posts.json',JSON.stringify(posts));}res.redirect('/?user='+req.query.user);});
-app.get('/profil',(req,res)=>{let u=getUser(req.query.user);let photo=u&&u.photo?`<img src="${u.photo}" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #c5a86a">`:`<div style="width:110px;height:110px;background:#c5a86a;color:#0a1931;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:bold;margin:0 auto">${req.query.user?req.query.user[0]:'G'}</div>`;res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body style="margin:0;background:#0a1931;color:white;font-family:Arial">${menu(req.query.user)}<div style="padding:30px;text-align:center">${photo}<h2>${req.query.user}</h2><p 
-style="color:#8aa0c0">${u?u.email:''}</p><form method="POST" action="/update-photo?user=${req.query.user}" enctype="multipart/form-data"><label style="background:#c5a86a;color:#0a1931;padding:10px 20px;border-radius:20px;font-weight:bold;cursor:pointer;display:inline-block">Changer photo <input type="file" name="photo" accept="image/*" style="display:none" onchange="this.form.submit()"></label></form><br><br><a href="/?user=${req.query.user}" style="color:#c5a86a">Retour</a></div></body></html>`);});
-app.post('/update-photo',upload.single('photo'),(req,res)=>{let users=JSON.parse(fs.readFileSync('users.json'));let idx=users.findIndex(x=>x.name===req.query.user);if(idx>=0&&req.file){users[idx].photo=`data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;fs.writeFileSync('users.json',JSON.stringify(users));}res.redirect('/profil?
-user='+req.query.user);});
-app.listen(process.env.PORT||10000);  
+const upload = multer({ storage: multer.memoryStorage() });
 
+function getUser(name){ try{ let u=JSON.parse(fs.readFileSync('users.json')); return u.find(x=>x.name===name); }catch(e){ return null; } }
+
+function menu(userName){
+ let u=getUser(userName);
+ let photoHtml = u && u.photo? `<img src="${u.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">` : `<div 
+ style="width:32px;height:32px;border-radius:50%;background:#C9A86A;display:flex;align-items:center;justify-content:center;font-weight:bold;">${userName?userName[0].toUpperCase():'G'}</div>`;
+ return `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:#111;color:#C9A86A;"><a href="/?user=${userName}" style="color:#C9A86A;text-decoration:none;font-weight:bold;">GMK ARROW</a><a href="/profile?user=${userName}" style="display:flex;align-items:center;gap:8px;color:white;text-decoration:none;">${photoHtml}<span>${userName}</span></a></div>`;
+}
+function pageRegister(msg=''){
+ return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GMK ARROW</title></head>
+ <body style="margin:0;font-family:sans-serif;background:#0a0a0a;color:white;">
+ <div style="max-width:400px;margin:40px auto;padding:20px;">
+ <h1 style="color:#C9A86A;text-align:center;">GMK ARROW</h1>
+ <p style="color:red;text-align:center;">${msg}</p>
+ <form action="/register" method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:12px;">
+ <input name="name" placeholder="Ton nom" required style="padding:12px;border-radius:8px;border:none;">
+ <label style="background:#222;padding:12px;border-radius:8px;text-align:center;cursor:pointer;">📷 Choisir photo de profil <input type="file" 
+name="photo" accept="image/*" style="display:none;" onchange="let r=new FileReader();r.onload=e=>{document.getElementById('prev').innerHTML='<img src='+e.target.result+' style=width:100%;border-radius:8px;max-height:200px;object-fit:cover>'};r.readAsDataURL(this.files[0])"></label>
+ <div id="prev"></div>
+ <input name="password" type="password" placeholder="Mot de passe" required style="padding:12px;border-radius:8px;border:none;">
+ <button style="padding:12px;background:#C9A86A;border:none;border-radius:8px;font-weight:bold;">S'inscrire ARROW</button>
+ </form>
+ <p style="text-align:center;margin-top:12px;"><a href="/login" style="color:#C9A86A;">Déjà inscrit? Se connecter</a></p>
+ </div></body></html>`;
+}
+app.get('/register',(req,res)=>res.send(pageRegister()));
+app.get('/login',(req,res)=>{
+res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;font-family:sans-serif;background:#0a0a0a;color:white;"><div style="max-width:400px;margin:40px auto;padding:20px;"><h1 style="color:#C9A86A;text-align:center;">Connexion</h1><form action="/login" method="post" style="display:flex;flex-direction:column;gap:12px;"><input name="name" placeholder="Nom" required style="padding:12px;border-radius:8px;border:none;"><input name="password" type="password" placeholder="Mot de passe" required style="padding:12px;border-radius:8px;border:none;"><button style="padding:12px;background:#C9A86A;border:none;border-radius:8px;font-weight:bold;">Entrer</button></form><p style="text-align:center;"><a href="/register" style="color:#C9A86A;">Créer compte</a></p></div></body></html>`);
+});
+app.post('/register', upload.single('photo'), (req,res)=>{
+ let users=JSON.parse(fs.readFileSync('users.json'));
+ if(users.find(x=>x.name===req.body.name)) return res.send(pageRegister('Nom déjà pris'));
+ let photoBase64 = '';
+ if(req.file){ photoBase64 = 'data:'+req.file.mimetype+';base64,'+req.file.buffer.toString('base64'); }
+ users.push({name:req.body.name,password:req.body.password,photo:photoBase64});
+ fs.writeFileSync('users.json', JSON.stringify(users));
+ res.redirect('/?user='+encodeURIComponent(req.body.name));
+});
+
+app.post('/login',(req,res)=>{
+ let u=getUser(req.body.name);
+ if(!u || u.password!==req.body.password) return res.send('Mauvais mot de passe <a href=/login>Retour</a>');
+ res.redirect('/?
+user='+encodeURIComponent(req.body.name));
+});
+
+app.get('/',(req,res)=>{
+ if(!req.query.user) return res.redirect('/register');
+ let posts=JSON.parse(fs.readFileSync('posts.json')).reverse();
+ let htmlPosts=posts.map(p=>{
+  let user=getUser(p.user);
+  let pPhoto=user&&user.photo?`<img src="${user.photo}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">`:`<div style="width:30px;height:30px;border-radius:50%;background:#C9A86A;display:flex;align-items:center;justify-content:center;">${p.user[0]}</div>`;
+  let img=p.photo?`<img src="${p.photo}" style="width:100%;border-radius:10px;margin-top:10px;max-height:400px;object-fit:cover;">`:'';
+  return `<div 
+style="background:#1a1a1a;padding:12px;border-radius:10px;margin-bottom:12px;"><div style="display:flex;align-items:center;gap:8px;">${pPhoto}<b>${p.user}</b></div><div style="margin-top:8px;">${p.text}</div>${img}</div>`;
+ }).join('');
+ res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GMK ARROW</title></head><body style="margin:0;font-family:sans-serif;background:#0a0a0a;color:white;">
+ ${menu(req.query.user)}
+ <div style="max-width:500px;margin:0 auto;padding:12px;">
+ <form action="/post?user=${encodeURIComponent(req.query.user)}" method="post" enctype="multipart/form-data" style="background:#1a1a1a;padding:12px;border-radius:10px;display:flex;flex-direction:column;gap:10px;margin-bottom:15px;">
+ <textarea name="text" placeholder="Quoi de neuf ${req.query.user}?" style="padding:12px;border-radius:8px;border:none;min-height:60px;"></
+ textarea>
+ <div id="prevPost"></div>
+ <label style="background:#222;padding:10px;border-radius:8px;text-align:center;cursor:pointer;">📷 Ajouter une photo <input type="file" name="photo" accept="image/*" style="display:none;" onchange="let r=new FileReader();r.onload=e=>{document.getElementById('prevPost').innerHTML='<img src='+e.target.result+' style=width:100%;border-radius:8px;max-height:250px;object-fit:cover>'};r.readAsDataURL(this.files[0])"></label>
+ <button style="padding:12px;background:#C9A86A;border:none;border-radius:8px;font-weight:bold;">ARROW ➤ Poster</button>
+ </form>
+ ${htmlPosts || '<p style=text-align:center;color:#666>Aucun post encore. Sois le premier!</p>'}
+ </div></body></html>`);
+});
+app.post('/post', upload.single('photo'), (req,res)=>{
+ let posts=JSON.parse(fs.readFileSync('posts.json'));
+ let photoBase64='';
+ if(req.file){ photoBase64='data:'+req.file.mimetype+';base64,'+req.file.buffer.toString('base64'); }
+ posts.push({user:req.query.user,text:req.body.text||'',photo:photoBase64,time:Date.now()});
+ fs.writeFileSync('posts.json', JSON.stringify(posts));
+ res.redirect('/?user='+encodeURIComponent(req.query.user));
+});
+app.get('/profile',(req,res)=>{
+ let u=getUser(req.query.user);
+ if(!u) return res.redirect('/register');
+ let photo=u.photo?`<img src="${u.photo}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;">`:`<div style="width:100px;height:100px;border-radius:50%;background:#C9A86A;display:flex;align-items:center;justify-content:center;font-size:40px;">${u.name[0].toUpperCase()}</div>`;
+ res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;font-family:sans-serif;background:#0a0a0a;color:white;">${menu(req.query.user)}<div style="max-width:400px;margin:20px auto;padding:20px;text-align:center;"><div style="display:flex;justify-content:center;">${photo}</div><h2>${u.name}</h2><form action="/update-photo?user=${encodeURIComponent(req.query.user)}" method="post" enctype="multipart/form-data" style="margin-top:15px;display:flex;flex-direction:column;gap:10px;"><div id="prevProf"></div><label 
+ style="background:#C9A86A;color:black;padding:10px;border-radius:8px;cursor:pointer;">📷 Changer photo <input type="file" name="photo" accept="image/*" style="display:none;" onchange="let r=new FileReader();r.onload=e=>{document.getElementById('prevProf').innerHTML='<img src='+e.target.result+' style=width:100%;border-radius:8px;max-height:200px;object-fit:cover>'};r.readAsDataURL(this.files[0])"></label><button style="padding:10px;background:#222;color:white;border:none;border-radius:8px;">Enregistrer</button></form><br><a href="/?user=${encodeURIComponent(req.query.user)}" style="color:#C9A86A;">Retour fil d'actu</a></div></body></html>`);
+});
+app.post('/update-photo', upload.single('photo'), (req,res)=>{
+ let users=JSON.parse(fs.readFileSync('users.json'));
+ let idx=users.findIndex(x=>x.name===req.query.user);
+ if(idx>=0 && req.file){ users[idx].photo='data:'+req.file.mimetype+';base64,'+req.file.buffer.toString('base64'); fs.writeFileSync('users.json', JSON.stringify(users)); }
+ res.redirect('/profile?user='+encodeURIComponent(req.query.user));
+});
+
+app.get('/reset-gmk-2024',(req,res)=>{ fs.writeFileSync('users.json','[]'); fs.writeFileSync('posts.json','[]'); res.send('Reset OK <a href=/register>Register</a>'); });
+
+const PORT=process.env.PORT||3000;
+app.listen(PORT,()=>console.log('GMK ARROW on '+PORT));
+
+
+ 
