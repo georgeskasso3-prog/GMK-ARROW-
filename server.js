@@ -10,25 +10,26 @@ let posts = [];
 
 app.get('/', (req, res) => {
   res.send(`
-  <html><head><title>GMK ARROW</title></head>
-  <body style="background:#001f3f; color:#FFD700; font-family:Arial; text-align:center; padding:50px;">
-    <h1>GMK ARROW</h1>
-    <h2>Bienvenue Chef Georges-Marie Kasso</h2>
-    <a href="/register" style="background:#FFD700; color:#001f3f; padding:15px 30px; text-decoration:none; border-radius:10px; font-weight:bold;">S'inscrire</a>
-    <br><br><br>
-    <a href="/dashboard?user=Georges-Marie Kasso" style="color:white;">Mon Dashboard Tour de controle</a>
-  </body></html>
+  <html><head><title>GMK ARROW</title><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+  <body style="background:#001f3f; color:#FFD700; font-family:Arial; text-align:center; padding:20px; margin:0; min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+    <h1 style="font-size:50px; margin-bottom:10px;">GMK ARROW</h1>
+    <h2 style="font-size:28px; margin-bottom:30px; padding:0 20px;">Bienvenue Chef Georges-Marie Kasso</h2>
+    <a href="/register" style="background:#FFD700; color:#001f3f; padding:20px 45px; text-decoration:none; border-radius:15px; font-weight:bold; font-size:22px; display:inline-block;">S'inscrire</a>
+    <br><br>
+    <a href="/dashboard?user=Georges-Marie Kasso" style="color:white; font-size:18px; text-decoration:underline;">Mon Dashboard Tour de controle</a>
+    </body></html>
   `);
 });
 app.get('/register', (req, res) => {
   res.send(`
-  <html><body style="background:#001f3f; color:#FFD700; font-family:Arial; text-align:center; padding:40px;">
-    <h1>Inscription GMK ARROW</h1>
-    <form action="/register" method="POST">
-      <input name="nom" placeholder="Nom complet" required style="padding:10px; width:300px;"><br><br>
-      <input name="email" placeholder="Email" required style="padding:10px; width:300px;"><br><br>
-      <input name="tel" placeholder="Telephone" style="padding:10px; width:300px;"><br><br>
-      <button type="submit" style="background:#FFD700; padding:15px 30px; border:none; border-radius:10px; font-weight:bold;">S'inscrire</button>
+  <html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="background:#001f3f; color:#FFD700; font-family:Arial; text-align:center; padding:20px;">
+    <h1 style="font-size:36px;">Inscription GMK ARROW</h1>
+    <form action="/register" method="POST" style="margin-top:30px;">
+      <input name="nom" placeholder="Nom complet" required style="padding:18px; width:90%; max-width:400px; font-size:18px; border-radius:10px;"><br><br>
+      <input name="email" placeholder="Email" required style="padding:18px; width:90%; max-width:400px; font-size:18px; border-radius:10px;"><br><br>
+      <input name="tel" placeholder="Telephone" style="padding:18px; width:90%; max-width:400px; font-size:18px; border-radius:10px;"><br><br>
+      <button type="submit" style="background:#FFD700; color:#001f3f; padding:18px 45px; border:none; border-
+      radius:12px; font-weight:bold; font-size:20px; margin-top:20px;">S'inscrire</button>
     </form>
   </body></html>
   `);
@@ -42,17 +43,18 @@ app.post('/register', (req, res) => {
   fs.appendFileSync('membres.txt', ligne);
   res.redirect('/feed?user=' + encodeURIComponent(nom));
 });
+
 app.get('/feed', (req, res) => {
   const user = req.query.user || 'Invite';
   let postsHTML = '';
   for(let i=0;i<posts.length;i++){
     let p = posts[i];
     let img = p.photo? '<br><br><img src="'+p.photo+'" style="width:100%; border-radius:10px;">' : '';
-    postsHTML += '<div style="background:#000; border:2px solid #FFD700; border-radius:15px; padding:20px; margin:20px auto; max-width:500px; text-align:left;"><b>'+p.user+'</b> - '+p.date+'<br><br>'+p.texte+img+'</div>';
+    postsHTML += '<div style="background:#000; border:2px solid #FFD700; border-radius:15px; padding:20px; margin:20px auto; max-width:500px; text-align:left;"><b>'+p.user+'</b> - 
+      '+p.date+'<br><br>'+p.texte+img+'</div>';
   }
-  res.send('<html><head><title>Feed</title></head><body style="background:#001f3f; color:#FFD700; font-family:Arial; padding:20px; text-align:center;"><h1>GMK ARROW - Feed de '+user+'</h1><div id="posts">'+postsHTML+'</div><br><a href="/dashboard?user='+encodeURIComponent(user)+'" style="color:#FFD700;">Aller au Dashboard Blanc</a></body></html>');
+  res.send('<html><head><title>Feed</title><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="background:#001f3f; color:#FFD700; font-family:Arial; padding:20px; text-align:center;"><h1 style="font-size:28px;">GMK ARROW - Feed de '+user+'</h1><div id="posts">'+postsHTML+'</div><br><a href="/dashboard?user='+encodeURIComponent(user)+'" style="color:#FFD700; font-size:18px;">Aller au Dashboard Blanc</a></body></html>');
 });
-
 app.get('/dashboard', (req, res) => {
   fs.readFile('membres.txt', 'utf8', (err, data) => {
     if (err) data = '';
@@ -69,44 +71,48 @@ app.get('/dashboard', (req, res) => {
       let dateStr = parts[parts.length - 1];
       if(!dateStr) continue;
       if(dateStr.trim() === aujourdhui) countJour++;
-      if(dateStr.includes('/'+moisActuel+'/')) countMois++;
-      if(dateStr.includes('/'+anneeActuelle)) countAnnee++;
+      let dParts = dateStr.trim().split('/');
+      if(dParts.length===3){
+        if(parseInt(dParts[1])===moisActuel) 
+          countMois++;
+        if(parseInt(dParts[2])===anneeActuelle) countAnnee++;
+      }
     }
     let membresHTML = '';
     for(let i=0;i<lignes.length;i++){
-      membresHTML += '<div style="padding:15px; border-bottom:1px solid #eee; color:#333;">'+lignes[i].split(' - ').join(' | ')+'</div>';
+      membresHTML += '<div style="padding:15px; border-bottom:1px solid #eee; color:#333; font-size:16px;">'+lignes[i].split(' - ').join(' | ')+'</div>';
     }
     res.send(`
     <html><head><title>Dashboard GMK ARROW</title><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-    <body style="background:#FFFFFF; color:#111; font-family:Arial; padding:20px;">
+    <body style="background:#FFFFFF; color:#111; font-family:Arial; padding:15px; margin:0;">
       <div style="max-width:900px; margin:auto;">
-        <h1 style="text-align:center; color:#001f3f;">Dashboard GMK ARROW</h1>
-        <p style="text-align:center; color:#666;">Tour de controle - Fond Blanc</p>
-        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px; margin:30px 0;">
-          <div style="background:#001f3f; color:#FFD700; padding:25px; border-radius:15px; width:150px; text-align:center;">
-            <div style="font-size:12px;">AUJOURD HUI</div><div style="font-size:40px; font-weight:bold; margin-top:10px;">`+countJour+`</div>
+        <h1 style="text-align:center; color:#001f3f; font-size:32px;">Dashboard GMK ARROW</h1>
+        <p style="text-align:center; color:#666; font-size:18px;">Tour de controle - Fond Blanc</p>
+        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:15px; margin:25px 0;">
+          <div style="background:#001f3f; color:#FFD700; padding:25px; border-radius:15px; width:42%; max-width:160px; text-align:center;">
+            <div style="font-size:14px;">AUJOURD HUI</div><div style="font-size:45px; font-weight:bold; margin-top:10px;">`+countJour+`</div>
           </div>
-          <div style="background:#001f3f; color:#FFD700; padding:25px; border-radius:15px; width:150px; text-align:center;">
-            <div style="font-size:12px;">CETTE SEMAINE</div><div style="font-size:40px; font-weight:bold; margin-top:10px;">`+countSemaine+`</div>
-</div>
-          <div style="background:#001f3f; color:#FFD700; padding:25px; border-radius:15px; width:150px; text-align:center;">
-            <div style="font-size:12px;">CE MOIS</div><div style="font-size:40px; font-weight:bold; margin-top:10px;">`+countMois+`</div>
+          <div style="background:#001f3f; color:#FFD700; padding:25px; border-radius:15px; width:42%; max-width:160px; text-align:center;">
+            <div style="font-size:14px;">CETTE SEMAINE</div><div style="font-size:45px; font-weight:bold; margin-top:10px;">`+countSemaine+`</div>
+            </div>
+          <div style="background:#001f3f; color:#FFD700; padding:25px; border-radius:15px; width:42%; max-width:160px; text-align:center;">
+            <div style="font-size:14px;">CE MOIS</div><div style="font-size:45px; font-weight:bold; margin-top:10px;">`+countMois+`</div>
           </div>
-          <div style="background:#FFD700; color:#001f3f; padding:25px; border-radius:15px; width:150px; text-align:center;">
-            <div style="font-size:12px; font-weight:bold;">CETTE ANNEE</div><div style="font-size:40px; font-weight:bold; margin-top:10px;">`+countAnnee+`</div>
+          <div style="background:#FFD700; color:#001f3f; padding:25px; border-radius:15px; width:42%; max-width:160px; text-align:center;">
+            <div style="font-size:14px; font-weight:bold;">CETTE ANNEE</div><div style="font-size:45px; font-weight:bold; margin-top:10px;">`+countAnnee+`</div>
           </div>
         </div>
- <h2 style="color:#001f3f;">Liste Complete (`+lignes.length+` membres)</h2>
+        <h2 style="color:#001f3f; font-size:22px;">Liste Complete (`+lignes.length+` membres)</h2>
         <div style="background:#f9f9f9; border:1px solid #ddd; border-radius:15px; padding:10px; max-height:400px; overflow:auto;">
-          `+(membresHTML || '<p style="padding:20px; color:#999;">Aucun membre pour le moment</p>')+`
+          `+(membresHTML || '<p 
+             style="padding:20px; color:#999;">Aucun membre pour le moment</p>')+`
         </div>
-        <br><br><div style="text-align:center;"><a href="/" style="background:#001f3f; color:#FFD700; padding:12px 25px; text-decoration:none; border-radius:10px;">Accueil</a></div>
+        <br><br><div style="text-align:center; padding-bottom:30px;"><a href="/" style="background:#001f3f; color:#FFD700; padding:15px 30px; text-decoration:none; border-radius:10px; font-size:18px;">Accueil</a></div>
       </div>
     </body></html>
     `);
   });
 });
-app.listen(PORT, () => console.log('GMK ARROW Live sur ' + PORT));
+app.listen(PORT, () => console.log('GMK ARROW Mobile Ready sur ' + PORT));
 
 
-            
