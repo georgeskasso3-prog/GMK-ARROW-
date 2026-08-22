@@ -9,7 +9,7 @@ if (!fs.existsSync('posts.json')) fs.writeFileSync('posts.json', '[]');
 function menu(u){
  return `<div style="background:#0a1931;padding:10px 15px;display:flex;align-items:center;gap:15px;position:sticky;top:0;z-index:100;border-bottom:2px solid #c5a86a">
   <a href="/?user=${u||''}" style="display:flex;align-items:center;gap:10px;text-decoration:none">
-    <img src="/logo.jpeg" style="width:45px;height:45px;border-radius:8px;object-fit:cover">
+    <div style="width:45px;height:45px;background:#c5a86a;color:#0a1931;display:flex;align-items:center;justify-content:center;font-weight:bold;border-radius:8px;font-size:22px">G</div>
     <span style="color:#c5a86a;font-weight:bold;font-size:18px">GMK ARROW</span>
   </a>
    <a href="/?user=${u||''}" style="color:white;text-decoration:none;margin-left:20px">Fil</a>
