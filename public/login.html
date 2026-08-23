@@ -7,101 +7,95 @@
 body{margin:0;font-family:Arial;background:#0A1931;color:white;display:flex;justify-content:center;align-items:center;min-height:100vh}
 .card{background:#102542;border:2px solid #D4AF37;border-radius:20px;padding:25px;width:90%;max-width:360px;text-align:center}
 .profil{width:90px;height:90px;background:#0A1931;border:2px solid #D4AF37;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;color:#D4AF37;overflow:hidden;background-size:cover;background-position:center;cursor:pointer;position:relative}
-.profil::after{content:"📸";position:absolute;bottom:-5px;right:0;background:#D4AF37;border-
-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.profil img{width:100%;height:100%;object-fit:cover}
 .title{font-size:26px;font-weight:900;color:#D4AF37}
 .slogan{color:#D4AF37;font-size:12px;margin-bottom:18px}
 .input-wrap{position:relative;margin:6px 0}
 input{width:100%;padding:13px 45px 13px 13px;background:#0A1931;color:white;border:1px solid #555;border-radius:8px;box-sizing:border-box}
-.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:20px;user-select:none}
+.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:22px;user-select:none;z-index:10}
 button{width:100%;padding:13px;background:#D4AF37;color:#0A1931;border:none;border-radius:8px;font-weight:900;cursor:pointer;margin-top:10px}
 a{color:#D4AF37;text-decoration:none;font-size:13px}
-.small{font-size:10px;color:#aaa;margin-top:8px}
 </style>
 </head>
 <body>
 <div class="card">
-<div class="profil" id="profilCircle" onclick="document.getElementById('fileInput').click()">👤</div>
-<input type="file" id="fileInput" accept="image/*" style="display:none" onchange="loadPhoto(event)">
+<div class="profil" id="profilCircle" onclick="openGallery()"><span id="profilText">👤</span></div>
+ <input type="file" id="fileInput" accept="image/*" style="display:none">
 <div class="title">Content de te revoir Chef!</div>
 <div class="slogan">Connecte-toi pour rejoindre la Communauté</div>
-<input type="text" id="pseudo" placeholder="Pseudo ou E-mail" oninput="updatePhoto()" style="width:100%;padding:13px;background:#0A1931;color:white;border:1px solid #555;border-radius:8px;margin:6px 0;box-sizing:border-box">
-
+<input type="text" id="pseudo" placeholder="Pseudo" oninput="updatePhoto()" style="width:100%;padding:13px;background:#0A1931;color:white;border:1px solid #555;border-radius:8px;margin:6px 0;box-sizing:border-box">
 <div class="input-wrap">
 <input type="password" id="pass" placeholder="Mot de passe">
-<span class="eye" id="eyeBtn" onclick="togglePass()">🙈</span>
+<span class="eye" id="eyeBtn">🙈</span>
 </div>
- <button onclick="connecter()">SE CONNECTER →</button>
+<button onclick="connecter()">SE CONNECTER →</button>
 <br><br>
 <a href="/register.html">Pas encore de compte? S'inscrire →</a>
-<div class="small">Clique sur GM pour mettre ta vraie photo 📸</div>
 </div>
 <script>
-let currentPhoto = "";
-function updatePhoto(){
- const val=document.getElementById('pseudo').value.trim();
- const circle=document.getElementById('profilCircle');
- if(val.length>0){
-  const saved = localStorage.getItem('gmk_photo_'+val);
-  if(saved){
-   circle.style.backgroundImage=`url(${saved})`;
-   circle.textContent="";
-   currentPhoto=saved;
-  } else {
-   const initials=val.split(' 
-').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-   circle.textContent=initials;
-   circle.style.backgroundColor="#D4AF37";
-   circle.style.color="#0A1931";
-   circle.style.backgroundImage="";
-  }
- } else {
-  circle.textContent="👤";
-  circle.style.backgroundColor="#0A1931";
-  circle.style.color="#D4AF37";
-  circle.style.backgroundImage="";
- }
-}
-function loadPhoto(e){
+const 
+circle=document.getElementById('profilCircle');
+const text=document.getElementById('profilText');
+const fileInput=document.getElementById('fileInput');
+const pseudoInput=document.getElementById('pseudo');
+const passInput=document.getElementById('pass');
+const eyeBtn=document.getElementById('eyeBtn');
+
+function openGallery(){ fileInput.click(); }
+
+fileInput.addEventListener('change', function(e){
  const file=e.target.files[0];
  if(!file) return;
  const reader=new FileReader();
  reader.onload=function(ev){
-  currentPhoto=ev.target.result;
-  const circle=document.getElementById('profilCircle');
-  circle.style.backgroundImage=`url(${currentPhoto})`;
- circle.textContent="";
-  const pseudo=document.getElementById('pseudo').value.trim();
-  if(pseudo){localStorage.setItem('gmk_photo_'+pseudo,currentPhoto);}
-  alert('Photo sauvée Chef! 📸');
+  const base64=ev.target.result;
+  circle.innerHTML='<img src="'+base64+'">';
+  circle.style.backgroundImage='';
+  localStorage.setItem('gmk_photo_'+pseudoInput.value, base64);
+  alert('Photo appliquée Chef! 📸');
  };
  reader.readAsDataURL(file);
-}
-function togglePass(){
- const input=document.getElementById('pass');
- const btn=document.getElementById('eyeBtn');
- if(input.type==="password"){input.type="text";btn.textContent="👁️";}
- else{input.type="password";btn.textContent="🙈";}
+});
+eyeBtn.addEventListener('click', function(){
+ if(passInput.type==='password'){
+  passInput.type='text';
+  eyeBtn.textContent='👁️';
+ } else {
+  passInput.type='password';
+  eyeBtn.textContent='🙈';
+ }
+});
+
+function updatePhoto(){
+ const val=pseudoInput.value.trim();
+ if(val.length===0){circle.innerHTML='<span id="profilText">👤</span>'; return;}
+ const saved=localStorage.getItem('gmk_photo_'+val);
+ if(saved){
+  circle.innerHTML='<img src="'+saved+'">';
+ } else {
+  const initials=val.split(/[\s-]+/).map(n=>n[0]).join('').substring(0,2).toUpperCase();
+ circle.innerHTML=initials;
+  circle.style.backgroundColor="#D4AF37";
+  circle.style.color="#0A1931";
+ }
 }
 async function connecter(){
- const pseudo=document.getElementById('pseudo').value;
- const password=document.getElementById('pass').value;
+ const pseudo=pseudoInput.value;
+ const password=passInput.value;
  if(!pseudo||!password){alert('Remplis tout Chef!');return;}
  try{
   const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pseudo,pseudo:pseudo,password})});
   const result=await res.json();
   if(res.ok){
    localStorage.setItem('gmk_user',JSON.stringify(result.user||{pseudo}));
-   if(currentPhoto) localStorage.setItem('gmk_photo_'+pseudo,currentPhoto);
-alert('Bienvenue Chef '+pseudo+'!');
+   alert('Bienvenue Chef '+pseudo+'!');
    window.location.href="/index.html";
   }else{alert(result.error||'Identifiants incorrects');}
- }catch(e){alert('Erreur serveur');}
+}catch(e){alert('Erreur serveur');}
 }
 updatePhoto();
 </script>
 </body>
 </html>
  
-   
-               
+ 
