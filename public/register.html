@@ -10,33 +10,31 @@ body { margin:0; font-family: Arial; background:#0A1931; color:white; display:fl
 .title { font-size:28px; font-weight:900; color:#D4AF37; }
 .slogan { color:white; font-size:13px; margin:5px 0; }
 .slogan2 { color:#D4AF37; font-size:11px; font-style:italic; margin-bottom:18px; }
-input { width:100%; padding:13px; background:#0A1931; color:white; border:1px solid #555; border-radius:10px; margin:6px 0; box-sizing:border-box; font-size:15px; }
+input { width:100%; padding:13px; background:#0A1931; color:white; border:1px solid #555; border-radius:8px; margin:6px 0; box-sizing:border-box; }
 .box { position:relative; }
-.eye { position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:22px; }
-button { width:100%; padding:13px; background:#D4AF37; color:#0A1931; border:none; border-radius:10px; font-weight:bold; cursor:pointer; margin-top:8px; font-size:15px; }
+.eye { position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; }
+button { width:100%; padding:13px; background:#D4AF37; color:#0A1931; border:none; border-radius:8px; font-weight:900; cursor:pointer; margin-top:10px; }
 a { color:#D4AF37; text-decoration:none; font-size:13px; }
 </style>
 </head>
 <body>
 <div class="card">
-<img src="logo.png" class="logo-img">
-<div class="title">GMK ARROW</div>
-<div class="slogan">La Nouvelle vision de la communication communautaire</div>
-<div class="slogan2">ensemble, nous irons plus loin!</div>
-
-<input id="nom" placeholder="Nom complet">
-<input id="email" type="email" placeholder="Email">
-<input id="tel" type="tel" placeholder="Téléphone">
-
+<img src="/logo.png" class="logo-img">
+<div class="title">GMK-ARROW-</div>
+<div class="slogan">La Vision Nouvelle de la Communication Communautaire</div>
+<div class="slogan2">Rejoignez le mouvement</div>
+<input type="text" id="nom" placeholder="Nom complet">
+<input type="email" id="email" placeholder="Email">
 <div class="box">
 <input type="password" id="pass" placeholder="Mot de passe">
 <span class="eye" id="eye" onclick="toggleEye()">👁️</span>
 </div>
-  <button onclick="inscrire()">CRÉER MON COMPTE ➤</button>
-<br><br>
-<a href="/comptes.html">Voir les comptes →</a>
-</div>
+<input type="tel" id="tel" placeholder="Téléphone">
 
+<button onclick="inscrire()">CRÉER MON COMPTE →</button>
+<br><br>
+<p style="margin-top:15px"><a href="/login.html">Déjà inscrit? Se connecter →</a></p>
+</div>
 <script>
 function toggleEye(){
  const p=document.getElementById('pass');
@@ -46,16 +44,20 @@ function toggleEye(){
 }
 async function inscrire(){
  const data={
-   nom:document.getElementById('nom').value,
-   email:document.getElementById('email').value,
-   tel:document.getElementById('tel').value,
-   pass:document.getElementById('pass').value,
-   date:new Date().toLocaleString()
+  nom:document.getElementById('nom').value,
+  email:document.getElementById('email').value,
+  password:document.getElementById('pass').value,
+  telephone:document.getElementById('tel').value
  };
-  if(!data.nom||!data.email||!data.pass){alert('Remplis tout Chef!'); return;}
- await fetch('/api/membres',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
- alert('Compte créé Chef! Bienvenue!');
- location.href='/feed.html';
+ if(!data.nom || !data.email || !data.password){alert('Remplis tout Chef!'); return;}
+ try{
+  const res=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  const result=await res.json();
+  if(res.ok){
+alert('Compte créé! Connecte-toi maintenant Chef!');
+   window.location.href="/login.html";
+  } else { alert(result.error || 'Erreur'); }
+ } catch(err){ alert('Erreur serveur'); }
 }
 </script>
 </body>
