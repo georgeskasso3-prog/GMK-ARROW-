@@ -5,8 +5,8 @@
 <title>Connexion - GMK ARROW</title>
 <style>
 body{margin:0;font-family:Arial;background:#0A1931;color:white;display:flex;justify-content:center;align-items:center;min-height:100vh}
-.card{background:#102542;border:2px solid #D4AF37;border-radius:20px;padding:25px;width:360px;text-align:center}
-.profil{width:80px;height:80px;background:#0A1931;border:2px dashed #D4AF37;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:30px}
+.card{background:#102542;border:2px solid #D4AF37;border-radius:20px;padding:25px;width:90%;max-width:360px;text-align:center}
+.profil{width:90px;height:90px;background:#0A1931;border:2px solid #D4AF37;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;color:#D4AF37;overflow:hidden;background-size:cover;background-position:center;transition:0.3s}
 .title{font-size:26px;font-weight:900;color:#D4AF37}
 .slogan{color:#D4AF37;font-size:12px;margin-bottom:18px}
 input{width:100%;padding:13px;background:#0A1931;color:white;border:1px solid #555;border-radius:8px;margin:6px 0;box-sizing:border-box}
@@ -16,16 +16,31 @@ a{color:#D4AF37;text-decoration:none;font-size:13px}
 </head>
 <body>
 <div class="card">
-<div class="profil">👤</div>
+<div class="profil" id="profilCircle">👤</div>
 <div class="title">Content de te revoir Chef!</div>
 <div class="slogan">Connecte-toi pour rejoindre la Communauté</div>
-<input type="text" id="pseudo" placeholder="Pseudo ou E-mail">
+<input type="text" id="pseudo" placeholder="Pseudo ou E-mail" oninput="updatePhoto()">
 <input type="password" id="pass" placeholder="Mot de passe">
 <button onclick="connecter()">SE CONNECTER →</button>
 <br><br>
 <a href="/register.html">Pas encore de compte? S'inscrire →</a>
 </div>
 <script>
+function updatePhoto(){
+ const val=document.getElementById('pseudo').value.trim();
+ const circle=document.getElementById('profilCircle');
+ if(val.length>0){
+  const initials=val.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  circle.textContent=initials;
+  circle.style.backgroundColor="#D4AF37";
+  circle.style.color="#0A1931";
+  circle.style.borderColor="#D4AF37";
+ } else {
+circle.textContent="👤";
+  circle.style.backgroundColor="#0A1931";
+  circle.style.color="#D4AF37";
+ }
+}
 async function connecter(){
  const pseudo=document.getElementById('pseudo').value;
  const password=document.getElementById('pass').value;
@@ -34,7 +49,7 @@ async function connecter(){
   const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pseudo,pseudo:pseudo,password})});
   const result=await res.json();
   if(res.ok){
-localStorage.setItem('gmk_user',JSON.stringify(result.user||{pseudo}));
+   localStorage.setItem('gmk_user',JSON.stringify(result.user||{pseudo}));
    alert('Bienvenue Chef '+pseudo+'!');
    window.location.href="/index.html";
   }else{alert(result.error||'Identifiants incorrects');}
@@ -43,5 +58,5 @@ localStorage.setItem('gmk_user',JSON.stringify(result.user||{pseudo}));
 </script>
 </body>
 </html>
-
-   
+ 
+ 
