@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 10000;
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
+app.use(express.static('public'));
 let posts = [];
 // Charger si fichier existe
 try {
@@ -25,7 +25,7 @@ body{background:#001f3f;color:#FFD700;font-family:Arial;text-align:center;paddin
 .logo{width:95vw;height:auto;border-radius:50%;max-width:95vw;display:block;margin:0 auto 20px auto;border:5px solid #FFD700;}
 </style>
 </head><body>
-<img src="https://i.imgur.com/8QJ4sQq.png" class="logo" alt="GMK ARROW LOGO">
+<img src="/logo.png" class="logo" alt="GMK ARROW LOGO">
 <h1 style="font-size:50px;">GMK ARROW</h1>
 <h2 style="font-size:28px;">Bienvenue Chef Georges-Marie Kasso</h2>
 <br>
