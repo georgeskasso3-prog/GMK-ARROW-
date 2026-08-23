@@ -40,4 +40,3 @@ app.get('/register',(req,res)=>{res.send('<h1>Register OK</h1>');});
 app.get('/dashboard',(req,res)=>{res.send('<h1>Dashboard OK Chef</h1>');});
 
 app.listen(PORT, ()=>console.log('GMK ARROW RUNNING on '+PORT));
-});
