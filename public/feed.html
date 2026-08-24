@@ -1,1 +1,69 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fil d'Actualité</title><style>body{font-family:sans-serif;background:#f0f2f5;margin:0;padding:12px}header{background:#fff;padding:12px;border-radius:8px;display:flex;justify-content:space-between}button{background:#0a2a7a;color:#fff;border:none;padding:8px 15px;border-radius:15px}.post{background:#fff;margin-top:15px;padding:15px;border-radius:10px}</style></head><body><header><b>📱 Fil D'Actualité</b><button onclick="location.href='carrefour.html'">⬅ Carrefour</button></header><div class="post"><b>Georges</b><p>Bienvenue! Ici tu postes photos, vidéos.</p><input placeholder="Quoi de neuf?" style="width:90%;padding:10px;border-radius:20px;border:1px solid #ccc"></div></body></html>
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GMK Fil d'Actualité</title>
+<style>
+body{font-family:sans-serif;background:#f0f2f5;margin:0}
+header{background:#fff;padding:12px;position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+.btn{border:none;padding:8px 15px;border-radius:20px;cursor:pointer}
+.btn-blue{background:#0a2a7a;color:#fff}
+.box{background:#fff;margin:10px;padding:15px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+textarea{width:100%;border:none;resize:none;font-size:16px;outline:none}
+.actions{display:flex;gap:8px;margin-top:10px}
+.action{flex:1;padding:8px;border:1px solid #ddd;border-radius:20px;background:#f0f2f5;text-align:center;cursor:pointer}
+.post img,.post video{width:100%;border-radius:10px;margin-top:10px;max-height:400px;object-fit:cover}
+.like{color:#0a2a7a;font-weight:bold;cursor:pointer;margin-right:15px}
+</style></head><body>
+<header><b>📱 Fil GMK</b><button class="btn btn-blue" onclick="location.href='carrefour.html'">⬅ Carrefour</button></header>
+
+<div class="box">
+<textarea id="text" rows="2" placeholder="Quoi de neuf Georges? Photo, vidéo, selfie..."></textarea>
+<div id="preview"></div>
+<div class="actions">
+<label class="action">📷 Photo<input type="file" id="photo" accept="image/*" hidden></label>
+<label class="action">🎥 Vidéo<input type="file" id="video" accept="video/*" hidden></label>
+</div>
+<button class="btn btn-blue" style="width:100%;margin-top:10px;padding:12px" onclick="publier()">Publier sur le Fil</button>
+</div>
+<div id="fil"></div>
+<script>
+let mediaData=""; let mediaType="";
+document.getElementById('photo').onchange=e=>{
+ let r=new FileReader(); r.onload=()=>{
+   mediaData=r.result; mediaType='image';
+   document.getElementById('preview').innerHTML='<img src="'+mediaData+'" style="width:100%;border-radius:10px;margin-top:10px">';
+ }; r.readAsDataURL(e.target.files[0]);
+}
+document.getElementById('video').onchange=e=>{
+ let r=new FileReader(); r.onload=()=>{
+   mediaData=r.result; mediaType='video';
+document.getElementById('preview').innerHTML='<video src="'+mediaData+'" controls style="width:100%;border-radius:10px;margin-top:10px"></video>';
+ }; r.readAsDataURL(e.target.files[0]);
+}
+
+function publier(){
+ let t=document.getElementById('text').value;
+ if(!t &&!mediaData) return alert("Écris quelque chose ou ajoute photo/vidéo!");
+ let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');
+ posts.unshift({text:t,media:mediaData,type:mediaType,date:new Date().toLocaleString(),likes:0});
+ localStorage.setItem('gmk_posts',JSON.stringify(posts));
+ document.getElementById('text').value=""; document.getElementById('preview').innerHTML=""; mediaData=""; mediaType="";
+ afficher();
+   }
+  html+='<div class="box post"><b>Georges Kasso</b> <small style="color:#888">• '+p.date+'</small><p>'+p.text+'</p>'+(p.media? (p.type=='image'? '<img src="'+p.media+'">' : '<video src="'+p.media+'" controls></video>') : '')+'<div style="margin-top:10px;border-top:1px solid #eee;padding-top:8px"><span class="like" onclick="liker('+i+')">👍 J\'aime ('+p.likes+')</span><span>💬 Commenter</span></div></div>';
+ });
+ document.getElementById('fil').innerHTML=html||'<div class="box" style="text-align:center;color:#888">Aucun post. Sois le premier!</div>';
+}
+function liker(i){
+ let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');
+ posts[i].likes++; localStorage.setItem('gmk_posts',JSON.stringify(posts)); afficher();
+}
+afficher();
+</script>
+</body></html>
+
+
+
+
+  
+   
+  
