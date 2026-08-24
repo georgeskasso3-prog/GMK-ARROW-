@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fil GMK</title>
+<style>
+body{background:#0a1931;color:white;font-family:Arial;margin:0}
+.header{padding:12px;display:flex;justify-content:space-between;border-bottom:2px solid #FFD700;background:#0a1931}
+.post-box{background:#112240;margin:12px;padding:14px;border-radius:16px;border:1px solid #FFD700}
+.post-box textarea{width:100%;height:70px;background:#0a1931;color:white;border:1px solid #333;border-radius:10px;padding:10px}
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.actions 
+button{background:#FFD700;color:#0a1931;border:none;padding:9px 14px;border-radius:20px;font-weight:bold}
+.feed{padding:12px}
+.card{background:#112240;border-radius:16px;padding:14px;margin-bottom:14px;border-left:4px solid #FFD700}
+.card img,.card video{width:100%;border-radius:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="header">
+<h3 style="margin:0;color:#FFD700">Fil GMK 🔒</h3>
+<a href="carrefour.html" style="color:#FFD700">← Carrefour</a>
+</div>
+<div class="post-box">
+<textarea id="txt" placeholder="Quoi de neuf Chef? Securise 🔒"></textarea>
+<input type="file" id="file" accept="image/*,video/*" style="display:none">
+<div class="actions">
+<button 
+onclick="document.getElementById('file').click()">📸 Selfie/Photo/Video</button>
+<button onclick="startVoice()" id="vBtn">🎙️ Vocal</button>
+<button onclick="publier()" style="background:white">Publier 🚀</button>
+</div>
+<div id="preview"></div><div id="vPreview"></div>
+</div>
+<div class="feed" id="feed"></div>
+<script>
+let blob=null,rec;
+document.getElementById('file').addEventListener('change',e=>{
+ const f=e.target.files[0];const u=URL.createObjectURL(f);
+ document.getElementById('preview').innerHTML=f.type.startsWith('video')?`<video src="${u}" controls></video>`:`<img src="${u}">`;
+});
+function startVoice(){
+ navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
+rec=new MediaRecorder(s);let ch=[];rec.ondataavailable=e=>ch.push(e.data);
+   rec.onstop=()=>{blob=new Blob(ch,{type:'audio/webm'});const u=URL.createObjectURL(blob);document.getElementById('vPreview').innerHTML=`<audio controls src="${u}"></audio>`;};
+   rec.start();document.getElementById('vBtn').innerText="⏹️ Stop";document.getElementById('vBtn').onclick=()=>{rec.stop();document.getElementById('vBtn').innerText="🎙️ Vocal";document.getElementById('vBtn').onclick=startVoice;};
+ });
+}
+function publier(){
+ const t=document.getElementById('txt').value;const p=document.getElementById('preview').innerHTML;const v=document.getElementById('vPreview').innerHTML;
+ if(!t&&!p&&!v){alert("Ajoute quelque chose Chef!");return;}
+const d=document.createElement('div');d.className='card';d.innerHTML=`<b>Georges-Marie 🔒</b><p>${t}</p>${p}${v}<br>❤️ Like | 💬 Commenter | ↗️ Partager`;
+ document.getElementById('feed').prepend(d);document.getElementById('txt').value="";document.getElementById('preview').innerHTML="";document.getElementById('vPreview').innerHTML="";
+}
+</script>
+</body>
+</html>
+  
