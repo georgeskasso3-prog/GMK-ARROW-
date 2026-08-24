@@ -1,120 +1,20 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GMK-ARROW</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#0a0a0a;color:#fff}
-.header{padding:12px;text-align:center;background:#111;border-bottom:2px solid #ff3b30;position:sticky;top:0;z-index:100}
-.logo{color:#ff3b30;font-weight:900;font-size:26px;cursor:pointer;letter-spacing:2px}
-.page{display:none;padding:20px;padding-bottom:80px;min-height:100vh}
-.page.active{display:block}
-.box{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:20px;margin:15px 0}
-input{width:100%;padding:14px;margin:8px 0;border-
-radius:8px;border:none;background:#222;color:white}
-button{width:100%;padding:14px;background:#ff3b30;color:white;border:none;border-radius:8px;font-weight:bold;margin-top:10px;cursor:pointer}
-.link{text-align:center;color:#aaa;margin-top:15px;cursor:pointer;text-decoration:underline}
-.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:#111;display:flex;justify-content:space-around;padding:12px 0;border-top:1px solid #333;z-index:100}
-.bottom-nav span{cursor:pointer;font-size:13px;text-align:center}
-.bottom-nav span.active{color:#ff3b30}
-h2{color:#ff3b30;margin-bottom:10px}
+body{margin:0;background:#020c1b;color:white;font-family:Arial;text-align:center;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center}
+img{width:160px;cursor:pointer;margin-bottom:20px}
+h2{color:#d4af37}
+.btn{color:#d4af37;margin-top:25px;cursor:pointer;text-decoration:underline}
 </style>
 </head>
 <body>
-
-<div class="header">
-<div class="logo" onclick="nextStep()">GMK-ARROW 🏹</div>
-</div>
-<!-- 1. ACCUEIL -->
-<div id="accueil" class="page active">
-<div class="box">
-<h2>Bienvenue dans la Communauté GMK-ARROW!</h2>
-<p style="margin-top:10px;line-height:1.5">La Vision Nouvelle de la Communication Communautaire</p>
-</div>
-<button onclick="goTo('inscription')">Veuillez-vous inscrire s'il vous plaît</button>
-<p style="text-align:center;margin-top:20px;opacity:0.6">Clique sur le Logo GMK-ARROW pour continuer ⬆️</p>
-</div>
-
-<!-- 2. INSCRIPTION -->
-<div id="inscription" class="page">
-<div class="box">
-<h2>Page d'Inscription</h2>
-<input id="reg_nom" placeholder="Nom">
-<input id="reg_email" placeholder="Email">
-<input id="reg_pass" type="password" placeholder="Mot de passe">
-<input id="reg_tel" placeholder="Téléphone">
-<button onclick="doInscription()">S'inscrire</button>
-<div class="link" onclick="goTo('connexion')">Veuillez-vous connecter</div>
-</div>
-</div>
-
-<!-- 3. CONNEXION -->
-<div id="connexion" class="page">
-<div class="box">
-<h2>Page de Connexion</h2>
-<div style="display:flex;gap:10px;align-items:center">
-<input id="log_pseudo" placeholder="Pseudo" style="flex:1">
-<div style="width:55px;height:55px;background:#222;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px dashed #ff3b30">📷</div>
-</div>
-<input id="log_email" placeholder="E-mail">
-<input id="log_pass" type="password" 
-placeholder="Mot de passe">
-<button onclick="doConnexion()">Se Connecter</button>
-<p style="text-align:center;margin-top:10px;font-size:12px;opacity:0.6">Photo de Profil = Pseudo (rond)</p>
-</div>
-</div>
-
-<!-- 4. LES 4 PAGES DU CARREFOUR -->
-<div id="carrefour" class="page">
-<div id="view-actu" class="carrefour-view">
-<h2>📰 Fil d'Actualité</h2>
-<div class="box">Photos, Vidéo + Commentaires<br><br><iframe src="feed.html" style="width:100%;height:500px;border:none;border-radius:10px;background:white"></iframe></div>
-</div>
-
-<div id="view-chats" class="carrefour-view" style="display:none">
-<h2>💬 Chats GMK</h2>
-<div class="box">Liste de contacts / Textes - 
-   Vocaux - Vidéos / Appels Vocaux-Vidéos<br><br><iframe src="chat.html" style="width:100%;height:500px;border:none;border-radius:10px;background:white"></iframe></div>
-</div>
-
-<div id="view-numeros" class="carrefour-view" style="display:none">
-<h2>📇 N°s Connectés</h2>
-<div class="box">Noms, ONG, Domaine d'action, Site web, Liste des GATES<br><br><iframe src="carrefour.html" style="width:100%;height:500px;border:none;border-radius:10px;background:white"></iframe></div>
-</div>
-
-<div id="view-coach" class="carrefour-view" style="display:none">
-<h2>🧠 GMK-COACH</h2>
-<div class="box">Dans tous les Aspects de la Vie - Bible x Coach - Base IA + Encouragement pour s'enraciner en Dieu<br><br><iframe
-<script>
-let current = 'accueil';
-function goTo(page){
-document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-document.getElementById(page).classList.add('active');
-current = page; window.scrollTo(0,0);
-}
-function nextStep(){
-if(current==='accueil') goTo('inscription');
-else if(current==='inscription') goTo('connexion');
-else if(current==='connexion') goTo('carrefour');
-else goTo('accueil');
-}
-function doInscription(){
-localStorage.setItem('gmk_user', document.getElementById('reg_nom').value);
-goTo('connexion');
-}
-function doConnexion(){
-goTo('carrefour');
-}
-             function showCarrefour(tab){
-document.querySelectorAll('.carrefour-view').forEach(v=>v.style.display='none');
-document.getElementById('view-'+tab).style.display='block';
-document.querySelectorAll('.bottom-nav span').forEach(s=>s.classList.remove('active'));
-document.getElementById('nav-'+tab).classList.add('active');
-}
-</script>
+   <img src="logo.png" onclick="location.href='register.html'">
+<h2>Bienvenue dans la Communaute<br>GMK-ARROW!</h2>
+<p>La Vision Nouvelle de la Communication Communautaire</p>
+<p class="btn" onclick="location.href='register.html'">Veuillez-vous inscrire s'il vous plait →</p>
 </body>
-</html>                                                                                                                
-
-  
+</html>
