@@ -1,4 +1,4 @@
- const express = require('express');
+const express = require('express');
 const path = require('path');
 const app = express();
 app.use(express.json());
@@ -12,8 +12,8 @@ app.post('/api/login', (req,res)=>{
  let user=membres.find(m=>m.pseudo.toLowerCase()===search || m.email.toLowerCase()===search) || {nom:pseudo||email, pseudo:pseudo||email};
  res.json({success:true, user});
 });
-app.post('/api/register', (req,res)=>{ membres.push(req.body); res.json({success:true}); });
+app.post('/api/register', 
+(req,res)=>{ membres.push(req.body); res.json({success:true}); });
 const PORT=process.env.PORT||3000;
 app.listen(PORT, ()=>console.log('GMK sur '+PORT));
 module.exports=app;
-    
