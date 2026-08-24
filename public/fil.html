@@ -3,25 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fil GMK</title>
+<title>Fil GMK V3.3</title>
 <style>
-body{background:#0a1931;color:white;font-family:Arial;margin:0;padding:0}
+body{background:#0a1931;color:white;font-family:Arial;margin:0;padding-bottom:80px}
 .header{background:#0a1931;color:#FFD700;padding:12px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #FFD700;position:sticky;top:0;z-index:10}
 .header a{color:#FFD700;text-decoration:none;font-weight:bold}
 .post-box{background:#112240;margin:15px;padding:15px;border-radius:16px;border:1px solid #FFD700}
 .post-box textarea{width:100%;height:70px;background:#0a1931;color:white;border:1px solid #555;border-radius:10px;padding:10px;box-sizing:border-box;font-size:16px;resize:none}
 .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.btns button{padding:10px 14px;border-radius:20px;border:none;font-weight:bold;cursor:pointer}
+.btns button{padding:12px 14px;border-radius:20px;border:none;font-weight:bold;cursor:pointer;font-size:14px}
 .card{background:#112240;margin:15px;padding:15px;border-radius:16px;border-left:4px solid #FFD700}
-.card p{line-height:1.5;font-size:15px}
+.card p{line-height:1.5;font-size:15px;white-space:pre-wrap}
 audio{width:100%;margin-top:8px}
-.interact{margin-top:12px;display:flex;gap:15px;font-weight:bold}
-.interact b{cursor:pointer}
-img,video{width:100%;border-radius:12px;margin-top:10px}
+.interact{margin-top:12px;display:flex;gap:18px;font-weight:bold;font-size:14px}
+.interact b{cursor:pointer;user-select:none}
+img,video{width:100%;border-radius:12px;margin-top:10px;max-height:400px;object-fit:cover}
+#preview img,#preview video{border:2px solid #FFD700}
 </style>
 </head>
 <body>
-<div class="header"><b>Fil GMK 🔒</b><a href="carrefour.html">← Carrefour</a></div>
+<div class="header"><b>Fil GMK 🔒 V3.3</b><a href="carrefour.html">← Carrefour</a></div>
 
 <div class="post-box">
 <textarea id="txt" placeholder="Quoi de neuf Chef?"></textarea>
@@ -30,54 +31,70 @@ img,video{width:100%;border-radius:12px;margin-top:10px}
 <div id="vPreview" style="margin-top:10px"></div>
 <div class="btns">
 <button onclick="openFile()" style="background:#FFD700;color:black">📁 Selfie/Photo/Video</button>
-<button onclick="doVoice()" id="vBtn" style="background:#FFD700;color:black">🎙️ Vocal</button>
+<button onclick="toggleVoice()" id="vBtn" style="background:#FFD700;color:black">🎙️ Vocal</button>
 <button onclick="doPost()" style="background:white;color:black">Publier 🚀</button>
 </div>
+<div id="msg" style="color:#FFD700;margin-top:8px;font-size:13px"></div>
 </div>
-<div id="feed">
-<div class="card">
-<b>Georges-Marie 🔒</b>
-<div style="margin-top:8px"><audio controls src=""></audio></div>
-<div class="interact"><span>❤️ Like |</span><span>💬 Commenter |</span><span>↗️ Partager</span></div>
-</div>
-<div class="card">
-<b>Georges-Marie 🔒</b>
-<p>Bonjour a toutes et a tous! Je suis GEORGES-MARIE KASSO, votre serviteur! C'est un reel plaisir et une immense joie pour moi de vous faire part de cette nouvelle vision de concevoir la communication communautaire. GMK-ARROW, en effet vient pour nous apporter beaucoup d'opportunités. GMK-ARROW est une application concue aider ceux qui sont opportunistes. ceux qui veulent evoluer avec leur temps. GMK-ARROW, ENSEMBLE, NOUS IRONS PLUS LOIN!</p>
-</div>
-</div>
+<div id="feed"></div>
 <script>
-let photoUrl="";let photoType="";let vocalUrl="";let recorder=null;
-function openFile(){document.getElementById('file').click();}
-document.getElementById('file').addEventListener('change',function(e){
-let f=e.target.files[0];if(!f)return;photoType=f.type;photoUrl=URL.createObjectURL(f);
-if(f.type.includes('video')){document.getElementById('preview').innerHTML='<video src="'+photoUrl+'" controls></video>';}else{document.getElementById('preview').innerHTML='<img src="'+photoUrl+'">';}
+let photoUrl=""; let photoType=""; let vocalUrl=""; let recorder=null; let chunks=[]; let isRecording=false;
+
+const initialFeed = `
+<div class="card"><b>Georges-Marie 🔒</b><p>Bonjour a toutes et a tous! Je suis GEORGES-MARIE KASSO, votre serviteur! C'est un reel plaisir et une immense joie pour moi de vous faire part de cette nouvelle vision de concevoir la communication communautaire. GMK-ARROW, en effet vient pour nous apporter beaucoup d'opportunités. GMK-ARROW est une application concue aider ceux qui sont opportunistes. ceux qui veulent evoluer avec leur temps. GMK-ARROW, ENSEMBLE, NOUS IRONS PLUS LOIN!</p><div class="interact"><b onclick="doLike(this)">❤️ Like (<span>0</span>)</b><b onclick="doComment(this)">💬 Commenter</b><b onclick="doShare(this)">↗️ Partager</b></div></div>
+`;
+document.getElementById('feed').innerHTML = initialFeed;
+
+function openFile(){ document.getElementById('file').click(); }
+document.getElementById('file').addEventListener('change', function(e){
+  let f=e.target.files[0]; if(!f) return;
+  photoType=f.type; if(photoUrl) URL.revokeObjectURL(photoUrl);
+  photoUrl=URL.createObjectURL(f);
+  if(f.type.includes('video')){ document.getElementById('preview').innerHTML='<video src="'+photoUrl+'" controls></video><br><b onclick="clearPhoto()" style="color:#ff5555;cursor:pointer">❌ Retirer</b>'; }
+  else { document.getElementById('preview').innerHTML='<img src="'+photoUrl+'"><br><b onclick="clearPhoto()" style="color:#ff5555;cursor:pointer">❌ Retirer</b>'; }
+document.getElementById('msg').innerText='Photo/Vidéo prête ✅';
 });
-function doVoice(){
-navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
-let chunks=[];recorder=new MediaRecorder(s);
+function clearPhoto(){ photoUrl=""; photoType=""; document.getElementById('preview').innerHTML=""; document.getElementById('file').value=""; document.getElementById('msg').innerText=''; }
+
+async function toggleVoice(){
+  if(isRecording){ recorder.stop(); return; }
+  try{
+    let s=await navigator.mediaDevices.getUserMedia({audio:true});
+    chunks=[]; recorder=new MediaRecorder(s); isRecording=true;
+    document.getElementById('vBtn').innerText='⏹️ Stop'; document.getElementById('vBtn').style.background='#ff5555';
 recorder.ondataavailable=e=>chunks.push(e.data);
-recorder.onstop=()=>{let blob=new Blob(chunks,{type:'audio/
-webm'});vocalUrl=URL.createObjectURL(blob);document.getElementById('vPreview').innerHTML='<audio controls src="'+vocalUrl+'"></audio>';document.getElementById('vBtn').innerText='🎙️ Vocal';};
-recorder.start();document.getElementById('vBtn').innerText='⏹️ Stop';document.getElementById('vBtn').onclick=()=>{recorder.stop();document.getElementById('vBtn').onclick=doVoice;};
-});
+    recorder.onstop=()=>{
+      isRecording=false;
+      let blob=new Blob(chunks,{type:'audio/webm'});
+      if(vocalUrl) URL.revokeObjectURL(vocalUrl);
+      vocalUrl=URL.createObjectURL(blob);
+      document.getElementById('vPreview').innerHTML='<audio controls src="'+vocalUrl+'"></audio><br><b onclick="clearVocal()" style="color:#ff5555;cursor:pointer">❌ Retirer vocal</b>';
+      document.getElementById('vBtn').innerText='🎙️ Vocal'; document.getElementById('vBtn').style.background='#FFD700';
+      s.getTracks().forEach(t=>t.stop());
+    };
+    recorder.start();
+  }catch(err){ alert('Micro bloqué Chef! Autorise le micro dans Chrome.'); }
 }
+ function clearVocal(){ vocalUrl=""; document.getElementById('vPreview').innerHTML=""; }
+
 function doPost(){
-let text=document.getElementById('txt').value;
-if(!text&&!photoUrl&&!vocalUrl){alert('Écris quelque chose Chef!');return;}
-let id=Date.now();let mediaHtml="";
-if(photoUrl){if(photoType.includes('video')){mediaHtml='<video src="'+photoUrl+'" controls></video>';}else{mediaHtml='<img src="'+photoUrl+'">';}}
-if(vocalUrl){mediaHtml+='<audio controls src="'+vocalUrl+'"></audio>';}
-let 
-div=document.createElement('div');div.className='card';
-div.innerHTML='<b>Georges-Marie 🔒</b><p>'+text+'</p>'+mediaHtml+'<div class="interact"><span>❤️ Like</span><span>💬 Commenter</span><span>↗️ Partager</span></div>';
-document.getElementById('feed').prepend(div);
-document.getElementById('txt').value="";document.getElementById('preview').innerHTML="";document.getElementById('vPreview').innerHTML="";photoUrl="";vocalUrl="";
+  let text=document.getElementById('txt').value.trim();
+  if(!text &&!photoUrl &&!vocalUrl){ alert('Écris quelque chose Chef!'); return; }
+  let mediaHtml="";
+  if(photoUrl){ if(photoType.includes('video')) mediaHtml+='<video src="'+photoUrl+'" controls></video>'; else mediaHtml+='<img src="'+photoUrl+'">'; }
+  if(vocalUrl) mediaHtml+='<audio controls src="'+vocalUrl+'"></audio>';
+  let div=document.createElement('div'); div.className='card';
+  div.innerHTML='<b>Georges-Marie 🔒</b><p>'+ (text? text.replace(/</g,'&lt;') : '') +'</p>'+mediaHtml+'<div class="interact"><b onclick="doLike(this)">❤️ Like (<span>0</span>)</b><b onclick="doComment(this)">💬 Commenter</b><b onclick="doShare(this)">↗️ 
+Partager</b></div><div class="comments"></div>';
+  document.getElementById('feed').prepend(div);
+  document.getElementById('txt').value=""; clearPhoto(); clearVocal(); document.getElementById('msg').innerText='Publié ✅';
 }
+
+function doLike(el){ let span=el.querySelector('span'); let n=parseInt(span.innerText); span.innerText=n+1; el.style.color='#FFD700'; }
+function doComment(el){ let txt=prompt('Ton commentaire Chef:'); if(!txt) return; let box=el.closest('.card').querySelector('.comments'); let p=document.createElement('p'); p.style.background='#0a1931'; p.style.padding='8px'; p.style.borderRadius='8px'; p.style.marginTop='8px'; p.innerHTML='<b>Toi:</b> '+txt.replace(/</g,'&lt;'); box.appendChild(p); }
+function doShare(el){ let cardText=el.closest('.card').querySelector('p').innerText; if(navigator.share){ navigator.share({title:'GMK-ARROW', text:cardText}); } else { navigator.clipboard.writeText(cardText); alert('Texte copié Chef! Colle-le où tu veux ↗️'); } }
 </script>
 </body>
 </html>
-
-
-
 
  
