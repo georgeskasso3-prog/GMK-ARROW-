@@ -1,19 +1,21 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname, 'public')));
-
-let posts = [{user:"Georges Kasso7", title:"Mon premier Poste", content:"Bienvenue sur GMK ARROW"}];
-let membres = [{nom:"Georges Kasso7", email:"georgeskasso39@gmail.com", tel:"0552813337", date:new Date().toLocaleString()}];
-
-app.get('/', (req,res)=>{
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+let membres = [{nom:"Georges Kasso", email:"georgeskasso39@gmail.com", pseudo:"Georges - Marie Kasso", password:"1234"}];
+app.get('/', (req,res)=>{ res.sendFile(path.join(__dirname, 'public', 'index.html')); });
+app.post('/api/login', (req,res)=>{
+ const {pseudo,email} = req.body;
+ const search=(pseudo||email||"").toLowerCase().trim();
+ let user=membres.find(m=>m.pseudo.toLowerCase()===search || m.email.toLowerCase()===search) || {nom:pseudo||email, pseudo:pseudo||email};
+ res.json({success:true, user});
 });
-app.get('/chef', (req,res)=>{
-  res.send(`
+app.post('/api/register', (req,res)=>{ membres.push(req.body); res.json({success:true}); });
+const PORT=process.env.PORT||3000;
+app.listen(PORT, ()=>console.log('GMK sur '+PORT));
+module.exports=app;
     <html><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>GMK ARROW</title>
     <style>body{background:#001f3f;color:#FFD700;font-family:Arial;padding:20px;text-align:center}
     .card{background:#000;padding:20px;border-radius:15px;border:2px solid #FFD700;max-width:400px;margin:20px auto}
