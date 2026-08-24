@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fil GMK V3.1 Fix</title>
+<title>Fil GMK V3.2</title>
 <style>
 body{background:#0a1931;color:white;font-family:Arial;margin:0}
 .header{padding:12px;display:flex;justify-content:space-between;border-bottom:2px solid #FFD700;background:#0a1931;position:sticky;top:0}
@@ -11,125 +11,66 @@ body{background:#0a1931;color:white;font-family:Arial;margin:0}
 textarea{width:100%;height:80px;background:#0a1931;color:white;border:1px solid #555;border-radius:10px;padding:10px;box-sizing:border-box;font-size:16px}
 .btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .btns button{padding:10px 15px;border-radius:20px;border:none;font-weight:bold}
-#preview img,#preview video{width:100%;border-radius:10px;margin-top:10px}
-.card{background:#112240;margin:12px;padding:14px;border-radius:16px;border-left:4px solid #FFD700}
+.card{background:#112240;margin:12px;padding:14px;border-radius:16px;border-left:4px solid #FFD700;word-wrap:break-word}
 .interact{display:flex;gap:20px;margin-top:10px}
 .interact b{cursor:pointer}
+img,video{width:100%;border-radius:10px;margin-top:10px;max-height:400px}
 </style>
 </head>
 <body>
-<div class="header"><b style="color:#FFD700">Fil GMK 🔒 V3.1</b><a href="carrefour.html" style="color:#FFD700;text-decoration:none">← Carrefour</a></div>
-
+<div class="header"><b style="color:#FFD700">Fil GMK 🔒 V3.2</b><a href="carrefour.html" style="color:#FFD700;text-decoration:none">← Carrefour</a></div>
 <div class="post-box">
 <textarea id="txt" placeholder="Quoi de neuf Chef?"></textarea>
 <input type="file" id="file" accept="image/*,video/*" style="display:none">
 <div id="preview"></div>
 <div id="vPreview"></div>
 <div class="btns">
-<button onclick="document.getElementById('file').click()" style="background:#FFD700">📸 Photo/Video</button>
-<button onclick="doVoice()" id="vBtn" style="background:#FFD700">🎙️ Vocal</button>
+<button onclick="openFile()" style="background:#FFD700">📸 Photo/Video</button>
+<button onclick="doVoice()" id="vBtn" 
+style="background:#FFD700">🎙️ Vocal</button>
 <button onclick="clearAll()" style="background:#ff4444;color:white">🗑️ Tout retirer</button>
 <button onclick="doPost()" style="background:white">Publier 🚀</button>
 </div>
 </div>
-
 <div id="feed"></div>
-
 <script>
-let audioBlob=null;
-let mediaRec=null;
-
-document.getElementById('file').onchange=function(e){
- let f=e.target.files[0]; if(!f) return;
- let url=URL.createObjectURL(f);
- let tag=f.type.includes('video')?`<video src="$
- {url}" controls></video>`:`<img src="${url}">`;
- document.getElementById('preview').innerHTML=tag+`<br><button onclick="clearPreview()" style="background:red;color:white;border:none;padding:6px 12px;border-radius:10px;margin-top:5px">❌ Retirer Photo/Video</button>`;
-}
-function clearPreview(){document.getElementById('preview').innerHTML="";document.getElementById('file').value="";}
-function clearVoice(){document.getElementById('vPreview').innerHTML="";audioBlob=null;}
-function clearAll(){document.getElementById('txt').value="";clearPreview();clearVoice();}
-
+let photoUrl="";let photoType="";let vocalUrl="";let recorder=null;
+function openFile(){document.getElementById('file').click();}
+document.getElementById('file').addEventListener('change',function(e){
+let f=e.target.files[0];if(!f)return;photoType=f.type;photoUrl=URL.createObjectURL(f);
+if(f.type.includes('video')){document.getElementById('preview').innerHTML='<video src="'+photoUrl+'" controls></video><br><button onclick="clearPhoto()" style="background:red;color:white;border:none;padding:6px 12px;border-radius:10px;margin-
+top:5px">❌ Retirer</button>';}else{document.getElementById('preview').innerHTML='<img src="'+photoUrl+'"><br><button onclick="clearPhoto()" style="background:red;color:white;border:none;padding:6px 12px;border-radius:10px;margin-top:5px">❌ Retirer</button>';}
+});
+function clearPhoto(){photoUrl="";photoType="";document.getElementById('preview').innerHTML="";document.getElementById('file').value="";}
+function clearVoice(){vocalUrl="";document.getElementById('vPreview').innerHTML="";}
+function clearAll(){document.getElementById('txt').value="";clearPhoto();clearVoice();}
 function doVoice(){
- navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
-   let chunks=[];
-   mediaRec=new MediaRecorder(stream);
-mediaRec.ondataavailable=e=>chunks.push(e.data);
-   mediaRec.onstop=()=>{
-     audioBlob=new Blob(chunks,{type:'audio/webm'});
-     let url=URL.createObjectURL(audioBlob);
-     document.getElementById('vPreview').innerHTML=`<audio controls src="${url}"></audio><br><button onclick="clearVoice()" style="background:red;color:white;border:none;padding:6px 12px;border-radius:10px;margin-top:5px">❌ Retirer Vocal</button>`;
-   };
-   mediaRec.start();
-   document.getElementById('vBtn').innerText="⏹️ Stop vocal";
-   document.getElementById('vBtn').onclick=()=>{
-     mediaRec.stop();
-     document.getElementById('vBtn').innerText="🎙️ Vocal";
-     document.getElementById('vBtn').onclick=doVoice;
-   };
- });
-}function doPost(){
- let text=document.getElementById('txt').value;
- let photo=document.getElementById('preview').innerHTML;
- let vocal=document.getElementById('vPreview').innerHTML;
-
- // Nettoyer les boutons retirer du post final
- let cleanPhoto=photo.replace(/<button.*<\/button>/g,"");
- let cleanVocal=vocal.replace(/<button.*<\/button>/g,"");
-
- if(!text &&!photo &&!vocal){alert("Écris quelque chose Chef!");return;}
-
- let id=Date.now();
- let div=document.createElement('div');
- div.className='card';
- div.id='p'+id;
- div.innerHTML=`
-   <div style="display:flex;justify-content:space-between"><b>Georges-Marie 🔒</
-b><button onclick="document.getElementById('p${id}').remove()" style="background:red;color:white;border:none;border-radius:10px;padding:4px 8px">🗑️ Supprimer</button></div>
-   <p>${text}</p>
-   ${cleanPhoto}
-   ${cleanVocal}
-   <div class="interact">
-     <b onclick="likeThis(${id})" id="lk${id}">❤️ Like 0</b>
-     <b onclick="commentThis(${id})">💬 Commenter</b>
-     <b onclick="shareThis(${id})">↗️ Partager</b>
-   </div>
-   <div id="c${id}" style="display:none;margin-top:10px"><input id="in${id}" placeholder="Commentaire..." style="width:100%;padding:8px;border-radius:10px;border:none" 
-onkeydown="if(event.key==='Enter'){addC(${id})}"><div id="lc${id}"></div></div>
- `;
- document.getElementById('feed').prepend(div);
- clearAll();
+navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
+let chunks=[];recorder=new MediaRecorder(s);
+recorder.ondataavailable=e=>chunks.push(e.data);
+recorder.onstop=()=>{let blob=new Blob(chunks,{type:'audio/
+webm'});vocalUrl=URL.createObjectURL(blob);document.getElementById('vPreview').innerHTML='<audio controls src="'+vocalUrl+'"></audio><br><button onclick="clearVoice()" style="background:red;color:white;border:none;padding:6px 12px;border-radius:10px;margin-top:5px">❌ Retirer Vocal</button>';document.getElementById('vBtn').innerText='🎙️ Vocal';};
+recorder.start();document.getElementById('vBtn').innerText='⏹️ Stop';document.getElementById('vBtn').onclick=()=>{recorder.stop();document.getElementById('vBtn').onclick=doVoice;};
+});
 }
-
-function likeThis(id){
- let el=document.getElementById('lk'+id);
- let num=parseInt(el.innerText.replace(/[^0-9]/g,''))||0;
- if(el.innerText.includes('Liké')){el.innerText='❤️ Like '+ (num-1); el.style.color='white';}
- else{el.innerText='❤️ Liké '+(num+1); el.style.color='#ff3040';}
+function doPost(){
+let text=document.getElementById('txt').value;
+if(!text&&!photoUrl&&!vocalUrl){alert('Écris quelque chose Chef!');return;}
+let id=Date.now();let mediaHtml="";
+if(photoUrl){if(photoType.includes('video')){mediaHtml='<video src="'+photoUrl+'" controls></video>';}else{mediaHtml='<img src="'+photoUrl+'">';}}
+if(vocalUrl){mediaHtml+='<audio controls src="'+vocalUrl+'" style="width:100%;margin-top:10px"></audio>';}
+let div=document.createElement('div');div.className='card';div.id='post'+id;
+div.innerHTML='<div style="display:flex;justify-content:space-between"><b>Georges-Marie 🔒</b><button onclick="document.getElementById(\'post'+id+'\').remove()" style="background:red;color:white;border:none;border-radius:8px;padding:4px 8px">🗑️</button></div><p>'+text+'</p>'+mediaHtml+'<div class="interact"><b onclick="likeThis('+id+')" id="lk'+id+'">❤️ Like 0</b><b onclick="commentThis('+id+')">💬 Commenter</b><b onclick="shareThis()">↗️ Partager</b></div><div id="c'+id+'" style="display:none;margin-top:10px"><input id="in'+id+'" placeholder="Commentaire..." style="width:100%;padding:8px;border-radius:8px;border:none" onkeydown="if(event.key===\'Enter\')
+{addComment('+id+')}"><div id="lc'+id+'"></div></div>';
+document.getElementById('feed').prepend(div);clearAll();
 }
-function commentThis(id){
- let c=document.getElementById('c'+id);
- c.style.display=c.style.display==='none'?'block':'none';
-}
-function addC(id){
- let input=document.getElementById('in'+id);
-let input=document.getElementById('in'+id);
- let list=document.getElementById('lc'+id);
- if(!input.value) return;
- let d=document.createElement('div');
- d.style.background='#0a1931';d.style.padding='6px';d.style.borderRadius='8px';d.style.marginTop='5px';
- d.innerHTML=input.value+` <span onclick="this.parentElement.remove()" style="float:right;cursor:pointer">❌</span>`;
- list.appendChild(d);
- input.value="";
-}
-function shareThis(id){
- let url=window.location.href;
- if(navigator.share){navigator.share({title:'GMK',text:'Regarde mon post GMK',url:url});}
- else{prompt("Copie ce lien pour partager Chef:",url);}
-}
+function likeThis(id){let el=document.getElementById('lk'+id);let n=parseInt(el.innerText.replace(/\D/g,''))||0;if(el.innerText.includes('Liké')){el.innerText='❤️ Like '+(n-1);el.style.color='white';}else{el.innerText='❤️ Liké '+(n+1);el.style.color='#ff3040';}}
+function commentThis(id){let c=document.getElementById('c'+id);c.style.display=c.style.display==='none'?'block':'none';}
+function addComment(id){let inp=document.getElementById('in'+id);let list=document.getElementById('lc'+id);if(!inp.value)return;let d=document.createElement('div');d.style.background='#0a1931';d.style.padding='6px';d.style.borderRadius='8px';d.style.marginTop='5px';d.innerHTML=inp.value+' <span onclick="this.parentElement.remove()" 
+style="float:right;cursor:pointer">❌</span>';list.appendChild(d);inp.value='';}
+function shareThis(){let u=window.location.href;if(navigator.share){navigator.share({title:'GMK',url:u});}else{prompt('Copie ce lien Chef:',u);}}
 </script>
 </body>
 </html>
-
 
  
