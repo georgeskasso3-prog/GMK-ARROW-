@@ -3,53 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fil GMK V3.2</title>
+<title>Fil GMK</title>
 <style>
-body{background:#0a1931;color:white;font-family:Arial;margin:0}
-.header{padding:12px;display:flex;justify-content:space-between;border-bottom:2px solid #FFD700;background:#0a1931;position:sticky;top:0}
-.post-box{background:#112240;margin:12px;padding:14px;border-radius:16px;border:1px solid #FFD700}
-textarea{width:100%;height:80px;background:#0a1931;color:white;border:1px solid #555;border-radius:10px;padding:10px;box-sizing:border-box;font-size:16px}
-.btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.btns button{padding:10px 15px;border-radius:20px;border:none;font-weight:bold}
-.card{background:#112240;margin:12px;padding:14px;border-radius:16px;border-left:4px solid #FFD700;word-wrap:break-word}
-.interact{display:flex;gap:20px;margin-top:10px}
+body{background:#0a1931;color:white;font-family:Arial;margin:0;padding:0}
+.header{background:#0a1931;color:#FFD700;padding:12px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #FFD700;position:sticky;top:0;z-index:10}
+.header a{color:#FFD700;text-decoration:none;font-weight:bold}
+.post-box{background:#112240;margin:15px;padding:15px;border-radius:16px;border:1px solid #FFD700}
+.post-box textarea{width:100%;height:70px;background:#0a1931;color:white;border:1px solid #555;border-radius:10px;padding:10px;box-sizing:border-box;font-size:16px;resize:none}
+.btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btns button{padding:10px 14px;border-radius:20px;border:none;font-weight:bold;cursor:pointer}
+.card{background:#112240;margin:15px;padding:15px;border-radius:16px;border-left:4px solid #FFD700}
+.card p{line-height:1.5;font-size:15px}
+audio{width:100%;margin-top:8px}
+.interact{margin-top:12px;display:flex;gap:15px;font-weight:bold}
 .interact b{cursor:pointer}
-img,video{width:100%;border-radius:10px;margin-top:10px;max-height:400px}
+img,video{width:100%;border-radius:12px;margin-top:10px}
 </style>
 </head>
 <body>
-<div class="header"><b style="color:#FFD700">Fil GMK 🔒 V3.2</b><a href="carrefour.html" style="color:#FFD700;text-decoration:none">← Carrefour</a></div>
+<div class="header"><b>Fil GMK 🔒</b><a href="carrefour.html">← Carrefour</a></div>
+
 <div class="post-box">
 <textarea id="txt" placeholder="Quoi de neuf Chef?"></textarea>
 <input type="file" id="file" accept="image/*,video/*" style="display:none">
 <div id="preview"></div>
-<div id="vPreview"></div>
+<div id="vPreview" style="margin-top:10px"></div>
 <div class="btns">
-<button onclick="openFile()" style="background:#FFD700">📸 Photo/Video</button>
-<button onclick="doVoice()" id="vBtn" 
-style="background:#FFD700">🎙️ Vocal</button>
-<button onclick="clearAll()" style="background:#ff4444;color:white">🗑️ Tout retirer</button>
-<button onclick="doPost()" style="background:white">Publier 🚀</button>
+<button onclick="openFile()" style="background:#FFD700;color:black">📁 Selfie/Photo/Video</button>
+<button onclick="doVoice()" id="vBtn" style="background:#FFD700;color:black">🎙️ Vocal</button>
+<button onclick="doPost()" style="background:white;color:black">Publier 🚀</button>
 </div>
 </div>
-<div id="feed"></div>
+<div id="feed">
+<div class="card">
+<b>Georges-Marie 🔒</b>
+<div style="margin-top:8px"><audio controls src=""></audio></div>
+<div class="interact"><span>❤️ Like |</span><span>💬 Commenter |</span><span>↗️ Partager</span></div>
+</div>
+<div class="card">
+<b>Georges-Marie 🔒</b>
+<p>Bonjour a toutes et a tous! Je suis GEORGES-MARIE KASSO, votre serviteur! C'est un reel plaisir et une immense joie pour moi de vous faire part de cette nouvelle vision de concevoir la communication communautaire. GMK-ARROW, en effet vient pour nous apporter beaucoup d'opportunités. GMK-ARROW est une application concue aider ceux qui sont opportunistes. ceux qui veulent evoluer avec leur temps. GMK-ARROW, ENSEMBLE, NOUS IRONS PLUS LOIN!</p>
+</div>
+</div>
 <script>
 let photoUrl="";let photoType="";let vocalUrl="";let recorder=null;
 function openFile(){document.getElementById('file').click();}
 document.getElementById('file').addEventListener('change',function(e){
 let f=e.target.files[0];if(!f)return;photoType=f.type;photoUrl=URL.createObjectURL(f);
-if(f.type.includes('video')){document.getElementById('preview').innerHTML='<video src="'+photoUrl+'" controls></video><br><button onclick="clearPhoto()" style="background:red;color:white;border:none;padding:6px 12px;border-radius:10px;margin-
-top:5px">❌ Retirer</button>';}else{document.getElementById('preview').innerHTML='<img src="'+photoUrl+'"><br><button onclick="clearPhoto()" style="background:red;color:white;border:none;padding:6px 12px;border-radius:10px;margin-top:5px">❌ Retirer</button>';}
+if(f.type.includes('video')){document.getElementById('preview').innerHTML='<video src="'+photoUrl+'" controls></video>';}else{document.getElementById('preview').innerHTML='<img src="'+photoUrl+'">';}
 });
-function clearPhoto(){photoUrl="";photoType="";document.getElementById('preview').innerHTML="";document.getElementById('file').value="";}
-function clearVoice(){vocalUrl="";document.getElementById('vPreview').innerHTML="";}
-function clearAll(){document.getElementById('txt').value="";clearPhoto();clearVoice();}
 function doVoice(){
 navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
 let chunks=[];recorder=new MediaRecorder(s);
 recorder.ondataavailable=e=>chunks.push(e.data);
 recorder.onstop=()=>{let blob=new Blob(chunks,{type:'audio/
-webm'});vocalUrl=URL.createObjectURL(blob);document.getElementById('vPreview').innerHTML='<audio controls src="'+vocalUrl+'"></audio><br><button onclick="clearVoice()" style="background:red;color:white;border:none;padding:6px 12px;border-radius:10px;margin-top:5px">❌ Retirer Vocal</button>';document.getElementById('vBtn').innerText='🎙️ Vocal';};
+webm'});vocalUrl=URL.createObjectURL(blob);document.getElementById('vPreview').innerHTML='<audio controls src="'+vocalUrl+'"></audio>';document.getElementById('vBtn').innerText='🎙️ Vocal';};
 recorder.start();document.getElementById('vBtn').innerText='⏹️ Stop';document.getElementById('vBtn').onclick=()=>{recorder.stop();document.getElementById('vBtn').onclick=doVoice;};
 });
 }
@@ -58,19 +66,18 @@ let text=document.getElementById('txt').value;
 if(!text&&!photoUrl&&!vocalUrl){alert('Écris quelque chose Chef!');return;}
 let id=Date.now();let mediaHtml="";
 if(photoUrl){if(photoType.includes('video')){mediaHtml='<video src="'+photoUrl+'" controls></video>';}else{mediaHtml='<img src="'+photoUrl+'">';}}
-if(vocalUrl){mediaHtml+='<audio controls src="'+vocalUrl+'" style="width:100%;margin-top:10px"></audio>';}
-let div=document.createElement('div');div.className='card';div.id='post'+id;
-div.innerHTML='<div style="display:flex;justify-content:space-between"><b>Georges-Marie 🔒</b><button onclick="document.getElementById(\'post'+id+'\').remove()" style="background:red;color:white;border:none;border-radius:8px;padding:4px 8px">🗑️</button></div><p>'+text+'</p>'+mediaHtml+'<div class="interact"><b onclick="likeThis('+id+')" id="lk'+id+'">❤️ Like 0</b><b onclick="commentThis('+id+')">💬 Commenter</b><b onclick="shareThis()">↗️ Partager</b></div><div id="c'+id+'" style="display:none;margin-top:10px"><input id="in'+id+'" placeholder="Commentaire..." style="width:100%;padding:8px;border-radius:8px;border:none" onkeydown="if(event.key===\'Enter\')
-{addComment('+id+')}"><div id="lc'+id+'"></div></div>';
-document.getElementById('feed').prepend(div);clearAll();
+if(vocalUrl){mediaHtml+='<audio controls src="'+vocalUrl+'"></audio>';}
+let 
+div=document.createElement('div');div.className='card';
+div.innerHTML='<b>Georges-Marie 🔒</b><p>'+text+'</p>'+mediaHtml+'<div class="interact"><span>❤️ Like</span><span>💬 Commenter</span><span>↗️ Partager</span></div>';
+document.getElementById('feed').prepend(div);
+document.getElementById('txt').value="";document.getElementById('preview').innerHTML="";document.getElementById('vPreview').innerHTML="";photoUrl="";vocalUrl="";
 }
-function likeThis(id){let el=document.getElementById('lk'+id);let n=parseInt(el.innerText.replace(/\D/g,''))||0;if(el.innerText.includes('Liké')){el.innerText='❤️ Like '+(n-1);el.style.color='white';}else{el.innerText='❤️ Liké '+(n+1);el.style.color='#ff3040';}}
-function commentThis(id){let c=document.getElementById('c'+id);c.style.display=c.style.display==='none'?'block':'none';}
-function addComment(id){let inp=document.getElementById('in'+id);let list=document.getElementById('lc'+id);if(!inp.value)return;let d=document.createElement('div');d.style.background='#0a1931';d.style.padding='6px';d.style.borderRadius='8px';d.style.marginTop='5px';d.innerHTML=inp.value+' <span onclick="this.parentElement.remove()" 
-style="float:right;cursor:pointer">❌</span>';list.appendChild(d);inp.value='';}
-function shareThis(){let u=window.location.href;if(navigator.share){navigator.share({title:'GMK',url:u});}else{prompt('Copie ce lien Chef:',u);}}
 </script>
 </body>
 </html>
+
+
+
 
  
