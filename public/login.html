@@ -89,7 +89,7 @@ async function connecter(){
   if(res.ok){
    localStorage.setItem('gmk_user',JSON.stringify(result.user||{pseudo}));
    alert('Bienvenue Chef '+pseudo+'!');
-   window.location.href="/index.html";
+   window.location.href="/carrefour.html";
   }else{alert(result.error||'Identifiants incorrects');}
 }catch(e){alert('Erreur serveur');}
 }
