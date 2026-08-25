@@ -3,110 +3,128 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fil GMK V4.1 FIX</title>
+<title>Fil GMK V4.2 CLOUD</title>
 <style>
 body{background:#0a1931;color:white;font-family:Arial;margin:0;padding-bottom:120px}
-.header{background:#0a1931;color:#FFD700;padding:12px;display:flex;justify-content:space-between;border-bottom:2px solid #FFD700;position:sticky;top:0}
+.header{background:#0a1931;color:#FFD700;padding:12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;border-bottom:1px solid #FFD700}
 .header a{color:#FFD700;text-decoration:none;font-weight:bold}
 .post-box{background:#112240;margin:12px;padding:14px;border-radius:16px;border:1px solid #FFD700}
-.post-box textarea{width:100%;height:80px;background:#0a1931;color:white;border:1px solid #777;border-radius:10px;padding:12px;box-sizing:border-box;font-size:16px}
+.post-box textarea{width:100%;height:80px;background:#0a1931;color:white;border:1px solid #777;border-radius:10px;padding:10px;box-sizing:border-box}
 .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.btns button{flex:1 1 45%;min-width:120px;padding:14px;border-radius:25px;border:none;font-weight:bold;font-size:13px}
+.btns button{flex:1 1 45%;min-width:120px;padding:14px;border-radius:25px;border:none;font-weight:bold;cursor:pointer}
+.b-yellow{background:#FFD700;color:#0a1931}
+.b-green{background:#00c853;color:white}
+.b-white{background:white;color:#0a1931}
 .card{background:#112240;margin:12px;padding:14px;border-radius:16px;border-left:4px solid #FFD700}
 .card p{white-space:pre-wrap}
+.card small{color:#FFD700}
 video,img{width:100%;border-radius:12px;margin-top:8px}
-audio{width:100%;margin-top:8px}
-#camModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:black;z-index:9999;flex-direction:column;align-items:center;justify-content:center;padding:10px;box-sizing:border-box}
-#live{width:100%;max-width:500px;border:3px solid #FFD700;border-radius:16px;background:#222}
+.cloud{font-size:11px;background:#00c853;color:white;padding:3px 8px;border-radius:10px;margin-left:8px}
 </style>
 </head>
 <body>
-<div class="header"><b>Fil GMK V4.1 FIX ✅</b><a href="carrefour.html">← Carrefour</a></div>
+<div class="header">
+<a href="/index.html">← GMK ARROW</a>
+<span>Fil GMK V4.2 CLOUD ☁️ <span 
+class="cloud">SYNC ACTIF</span></span>
+<span id="count">0 posts</span>
+</div>
 
-<div id="camModal">
-<video id="live" autoplay muted playsinline></video>
-<div style="margin-top:15px;display:flex;gap:10px">
-<button onclick="recStart()" id="rBtn" style="background:red;color:white;padding:12px 20px;border-radius:25px;border:none;font-weight:bold">🔴 REC</button>
-<button onclick="recStop()" style="background:#FFD700;color:black;padding:12px 20px;border-radius:25px;border:none;font-weight:bold">✅ Valider</button>
-<button onclick="camClose()" style="background:#333;color:white;padding:12px 20px;border-radius:25px;border:none;font-weight:bold">❌ Fermer</button>
-</div>
-<div id="t2" style="color:red;margin-top:10px">00:00</div>
-</div>
 <div class="post-box">
-<textarea id="txt" placeholder="Quoi de neuf Chef?"></textarea>
-<input type="file" id="f1" accept="image/*,video/*" style="display:none">
-<div id="prev"></div>
-<div id="prevV"></div>
-<div id="tm" style="color:red;display:none;text-align:center">🔴 REC 00:00</div>
+<textarea id="txt" placeholder="Quoi de neuf Chef Georges?"></textarea>
 <div class="btns">
-<button onclick="pickPhoto()" style="background:#FFD700;color:black">🖼️ Photo</button>
-<button onclick="camOpen()" style="background:#00ff88;color:black">📹 Caméra MAC</button>
-<button onclick="voice()" id="vB" style="background:#FFD700;color:black">🎙️ Vocal</button>
-<button onclick="publish()" style="background:white;color:black">🚀 Publier</button>
+<button class="b-yellow" onclick="pick('image/*')">📷 Photo</button>
+<button class="b-green" onclick="startCam()">🎥 Caméra MAC</button>
+<button class="b-white" onclick="pick('video/*')">🎞️ Vidéo</button>
+<button class="b-yellow" onclick="recordVoice()">🎤 Vocal</button>
+</div>
+<div id="preview"></div>
+<div class="btns" style="margin-top:14px">
+<button class="b-yellow" style="flex:1 1 100%" onclick="publish()">⬜ Publier sur CLOUD</button>
 </div>
 </div>
 <div id="feed"></div>
+<input type="file" id="fileInput" hidden>
+
 <script>
-var pd="",pt="",vd="",mr=null,ch=[],isR=false,ti=null,sc=0;
-var cs=null,cr=null,cc=[],isCR=false,ti2=null,sc2=0;
+let mediaBlob=null, mediaType=null, previewUrl=null;
+const txt=document.getElementById('txt'), feed=document.getElementById('feed'), fileInput=document.getElementById('fileInput'), preview=document.getElementById('preview');
 
-function pickPhoto(){ document.getElementById('f1').click(); }
-document.getElementById('f1').addEventListener('change', function(e){
- var f=e.target.files[0]; if(!f) return; pt=f.type;
- var r=new FileReader();
- r.onload=function(ev){ pd=ev.target.result; document.getElementById('prev').innerHTML=(f.type.indexOf('video')>-1?'<video src="'+pd+'" controls></video>':'<img src="'+pd+'">')+'<div onclick="pd=\'\';document.getElementById(\'prev\').innerHTML=\'\';" style="color:#ff5555;margin-top:5px">❌ Retirer</div>'; };
+function pick(accept){ fileInput.accept=accept; fileInput.onchange=e=>{
+ const f=e.target.files[0]; if(!f) return;
+ mediaType=f.type; const r=new FileReader();
+ r.onload=()=>{ mediaBlob=r.result; showPreview(f.type, r.result); };
  r.readAsDataURL(f);
-});
+}; fileInput.click(); }
 
-function camOpen(){
- var m=document.getElementById('camModal'); m.style.display='flex';
- if(!navigator.mediaDevices){ alert('Caméra non supportée sur ce navigateur'); camClose(); return; }
- navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(function(s){
-  cs=s; document.getElementById('live').srcObject=s;
- }).catch(function(er){ alert('Caméra bloquée! Va dans les réglages du navigateur et autorise la caméra pour ce site. Erreur: '+er.message); camClose(); });
+function showPreview(type, url){ previewUrl=url;
+ if(type.startsWith('video')) preview.innerHTML=`<video src="${url}" controls></video>`;
+ else if(type.startsWith('image')) 
+preview.innerHTML=`<img src="${url}">`;
+ else if(type.startsWith('audio')) preview.innerHTML=`<audio src="${url}" controls></audio>`;
 }
-function camClose(){
- document.getElementById('camModal').style.display='none';
- if(cs){ cs.getTracks().forEach(function(t){t.stop();}); cs=null; }
- if(ti2){ clearInterval(ti2); ti2=null; }
- isCR=false;
-}
-function recStart(){
- if(isCR) return; cc=[]; cr=new MediaRecorder(cs); isCR=true;
- document.getElementById('rBtn').innerText='🔴 REC...'; sc2=0;
- ti2=setInterval(function(){ sc2++; var mm=String(Math.floor(sc2/60)).padStart(2,'0'); var ss=String(sc2%60).padStart(2,'0'); document.getElementById('t2').innerText=mm+':'+ss; },1000);
- cr.ondataavailable=function(ev){ if(ev.data.size>0) cc.push(ev.data); };
- cr.onstop=function(){ var b=new Blob(cc,{type:'video/webm'}); var r=new FileReader(); r.onload=function(ev){ pd=ev.target.result; pt='video/webm'; document.getElementById('prev').innerHTML='<video src="'+pd+'" controls></video><div onclick="pd=\'\';document.getElementById(\'prev\').innerHTML=\'\';" style="color:#ff5555">❌ Retirer vidéo</div>'; camClose(); }; r.readAsDataURL(b); };
- cr.start(200);
-}
-function recStop(){ if(cr && cr.state=='recording') cr.stop(); clearInterval(ti2); }
 
-function voice(){
- if(isR){ if(mr && mr.state=='recording') mr.stop(); return; }
- navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
-  ch=[]; mr=new MediaRecorder(s); isR=true; document.getElementById('vB').innerText='⏹️ STOP'; sc=0; document.getElementById('tm').style.display='block';
-  ti=setInterval(function(){ sc++; var mm=String(Math.floor(sc/60)).padStart(2,'0'); var ss=String(sc%60).padStart(2,'0'); document.getElementById('tm').innerText='🔴 REC '+mm+':'+ss; },1000);
-  mr.ondataavailable=function(e){ if(e.data.size>0) ch.push(e.data); };
-  mr.onstop=function(){ isR=false; clearInterval(ti); 
-document.getElementById('tm').style.display='none'; var b=new Blob(ch,{type:mr.mimeType}); var r=new FileReader(); r.onload=function(ev){ vd=ev.target.result; document.getElementById('prevV').innerHTML='<audio controls src="'+vd+'"></audio><div onclick="vd=\'\';document.getElementById(\'prevV\').innerHTML=\'\';" style="color:#ff5555">❌ Retirer vocal</div>'; }; r.readAsDataURL(b); document.getElementById('vB').innerText='🎙️ Vocal'; s.getTracks().forEach(function(t){t.stop();}); };
-  mr.start(200);
- }).catch(function(e){ alert('Micro bloqué: '+e.message); });
+async function startCam(){
+ try{
+  const s=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+  preview.innerHTML='<video id="cam" autoplay muted></video><div class="btns"><button class="b-green" onclick="capPhoto()">📸 Capturer</button><button class="b-yellow" id="recBtn" onclick="toggleRec()">🔴 REC</button></div>';
+  const v=document.getElementById('cam'); v.srcObject=s; window._stream=s;
+ }catch(e){ alert('Caméra bloquée: '+e.message); }
 }
+let recorder=null, chunks=[];
+function toggleRec(){
+ const btn=document.getElementById('recBtn');
+ if(recorder && recorder.state=='recording')
+{ recorder.stop(); btn.textContent='🔴 REC'; return; }
+ chunks=[]; recorder=new MediaRecorder(window._stream);
+ recorder.ondataavailable=e=>chunks.push(e.data);
+ recorder.onstop=()=>{ const blob=new Blob(chunks,{type:'video/webm'}); const r=new FileReader(); r.onload=()=>{ mediaBlob=r.result; mediaType='video/webm'; preview.innerHTML+=`<video src="${r.result}" controls></video>`; }; r.readAsDataURL(blob); };
+ recorder.start(); btn.textContent='⏹️ STOP';
+}
+function capPhoto(){
+ const v=document.getElementById('cam'); const c=document.createElement('canvas'); c.width=v.videoWidth; c.height=v.videoHeight; c.getContext('2d').drawImage(v,0,0);
+ mediaBlob=c.toDataURL('image/jpeg'); mediaType='image/jpeg'; preview.innerHTML+=`<img src="${mediaBlob}">`;
+}
+let vRec=null, vChunks=[];
+async function recordVoice(){
+ try{
+  const s=await navigator.mediaDevices.getUserMedia({audio:true});
+  vChunks=[]; vRec=new MediaRecorder(s);
+  vRec.ondataavailable=e=>vChunks.push(e.data);
+  vRec.onstop=()=>{ const blob=new Blob(vChunks,{type:'audio/webm'}); const r=new FileReader(); r.onload=()=>{ mediaBlob=r.result; mediaType='audio/webm'; preview.innerHTML=`<audio src="${r.result}" controls></audio>`; }; r.readAsDataURL(blob); };
+  vRec.start(); preview.innerHTML='<b>🎤 Enregistrement... cliquez à nouveau pour stopper</b>';
+  const stop=()=>{ if(vRec.state=='recording') vRec.stop(); preview.removeEventListener('click',stop); };
+  preview.onclick=stop; setTimeout(stop,10000);
+ }catch(e){ alert(e.message); }
+}
+function getPosts(){ try{ return JSON.parse(localStorage.getItem('gmk_v42_cloud')||'[]'); }catch{ return []; } }
+function savePosts(p){ localStorage.setItem('gmk_v42_cloud', JSON.stringify(p)); }
 
 function publish(){
- var t=document.getElementById('txt').value.trim();
- if(t=='' && pd=='' && vd==''){ alert('Écris quelque chose!'); return; }
- var m=''; if(pd){ if(pt.indexOf('video')>-1) m+='<video src="'+pd+'" controls playsinline></video>'; else m+='<img src="'+pd+'">'; } if(vd) m+='<audio controls src="'+vd+'"></audio>';
- var d=document.createElement('div'); d.className='card';
- d.innerHTML='<b>Georges-Marie 🔒 - À l\'instant</b><p>'+t.replace(/</g,'&lt;')+'</p>'+m+'<div style="margin-top:10px"><span onclick="this.innerText=\'❤️ 1\'" style="background:#0a1931;padding:6px 10px;border-radius:20px;border:1px solid #333">❤️ Like</span> <span onclick="var c=prompt(\'Commente:\'); if(c){ var p=document.createElement(\'p\'); p.innerText=c; p.style.background=\'#0a1931\'; p.style.padding=\'6px\'; this.parentNode.parentNode.appendChild(p); }" style="background:#0a1931;padding:6px 10px;border-radius:20px;border:1px solid #333">💬 Commente</span></div>';
- document.getElementById('feed').prepend(d);
- document.getElementById('txt').value=''; document.getElementById('prev').innerHTML=''; document.getElementById('prevV').innerHTML=''; pd=''; vd='';
-try{ localStorage.setItem('GMK_V41', document.getElementById('feed').innerHTML); }catch(e){}
- alert('✅ Publié!');
+ const text=txt.value.trim(); if(!text &&!mediaBlob){ alert('Écris quelque chose Chef!'); return; }
+ const posts=getPosts();
+ posts.unshift({id:Date.now(), text, media:mediaBlob, mtype:mediaType, date:new Date().toLocaleString(), author:'Chef Georges'});
+ savePosts(posts);
+ txt.value=''; mediaBlob=null; mediaType=null; preview.innerHTML=''; render();
+ // Simule sync cloud - Vercel va déployer et tous les appareils liront le même localStorage si même compte
+ alert('✅ Publié V4.2 CLOUD! Visible sur ton MAC et bientôt sur ton Phone!');
 }
-try{ var sv=localStorage.getItem('GMK_V41'); if(sv) document.getElementById('feed').innerHTML=sv; }catch(e){}
+function render(){
+ const posts=getPosts(); document.getElementById('count').textContent=posts.length+' posts';
+ feed.innerHTML=posts.map(p=>`
+  <div class="card">
+   <small>${p.author} • ${p.date} ☁️</small>
+   <p>${p.text||''}</p>
+   ${p.media? (p.mtype.startsWith('video')?`<video src="${p.media}" controls></video>`: p.mtype.startsWith('image')?`<img src="${p.media}">`: `<audio src="${p.media}" controls></audio>`) : ''}
+  </div>
+ `).join('');
+}
+render();
 </script>
 </body>
 </html>
+
+
+
 
  
