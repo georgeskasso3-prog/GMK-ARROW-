@@ -1,125 +1,43 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fil GMK V4.3 PRO</title>
-<style>
-body{background:#0a1931;color:#FFD700;font-family:Arial;padding:12px;margin:0}
-.top{background:#000;padding:12px;border-radius:10px;display:flex;justify-content:space-between}
-.box{background:#0f274e;border:2px solid #FFD700;border-radius:15px;padding:15px;margin-top:10px}
-textarea{width:100%;height:80px;background:#000;color:#fff;border:1px solid #FFD700;border-radius:10px;padding:10px;box-sizing:border-box}
-button{padding:12px;border:none;border-radius:25px;font-
-weight:bold;margin:4px;cursor:pointer}
-#pub{background:#FFD700;color:#000;width:100%;font-size:18px;padding:15px;margin-top:10px}
-.post{background:#000;border:1px solid #FFD700;border-radius:10px;padding:10px;margin-top:10px}
-#camBox{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:99;flex-direction:column;align-items:center;justify-content:center}
-#camBox video{width:90%;max-width:400px;border-radius:15px}
-</style>
-</head>
-<body>
-<div class="top"><span>← GMK</span><span>Fil GMK V4.3 PRO ✅</span><span id="c">0 posts</span></div>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fil GMK V4.6</title>
+<style>body{background:#0a1931;color:#FFD700;font-family:Arial;padding:10px;margin:0}.top{background:#000;padding:12px;border-radius:10px;display:flex;justify-content:space-between}.box{background:#0f274e;border:2px solid #FFD700;border-radius:15px;padding:12px;margin-top:10px} 
+textarea{width:100%;height:80px;background:#000;color:#fff;border:1px solid #FFD700;border-radius:10px;padding:10px;box-sizing:border-box} button{padding:10px 14px;border:none;border-radius:20px;font-weight:bold;margin:4px;cursor:pointer} #btnPub{background:#FFD700;color:#000;width:100%;font-size:18px;padding:14px;margin-top:10px}.post{background:#000;border:1px solid #FFD700;border-radius:10px;padding:10px;margin-top:10px;color:#fff} #pv img{max-width:100%;border-radius:10px;margin-top:8px} #pv video{max-width:100%;border-radius:10px;margin-top:8px} 
+#camBox{display:none;position:fixed;inset:0;background:#000;z-index:999;flex-direction:column;align-items:center;justify-content:center} #camBox video{width:90%;max-width:400px;border-radius:12px;border:2px solid #FFD700}</style></head><body>
+<div class="top"><b>← GMK</b><b>Fil GMK V4.6 FIX ✅</b><span id="cnt">0 posts</span></div>
 <div class="box">
-<textarea id="t" placeholder="Quoi de neuf Chef?"></textarea>
-<div>
-<button style="background:#FFD700" onclick="fP.click()">📷 Photo</button>
-<button style="background:#00c853;color:#fff"
-onclick="openCam()">🎥 Caméra</button>
-<button style="background:#fff;color:#000" onclick="fV.click()">🎞️ Vidéo</button>
-<button id="btnVoc" style="background:#FFD700" onclick="toggleVocal()">🎤 Vocal</button>
+<textarea id="txt" placeholder="Quoi de neuf Chef?"></textarea>
+<div style="margin-top:8px">
+<button style="background:#FFD700" onclick="document.getElementById('f1').click()">📷 Photo</button>
+<button style="background:#00c853;color:#fff" onclick="openCam()">🎥 Caméra</button>
+<button style="background:#fff" onclick="document.getElementById('f2').click()">🎞️ Vidéo</button>
+<button id="bVoc" style="background:#FFD700" onclick="toggleVoc()">🎤 Vocal</button>
 </div>
-<input type="file" id="fP" accept="image/*" style="display:none" onchange="hF(this,'image')">
-<input type="file" id="fV" accept="video/*" style="display:none" onchange="hF(this,'video')">
+<input type="file" id="f1" accept="image/*" style="display:none"><input type="file" id="f2" accept="video/*" style="display:none">
 <div id="pv"></div>
-<button id="pub" onclick="publier()">🚀 Publier sur CLOUD</button>
+<button id="btnPub">🚀 Publier sur CLOUD</button>
+<div id="msg" style="color:#0f0;margin-top:6px"></div>
 </div>
 <div id="feed"></div>
-<div id="camBox">
-<video id="v" autoplay playsinline></video>
-<div style="margin-top:15px">
-<button style="background:#FFD700;color:#000" onclick="takePhoto()">📸 Capturer</button>
-<button style="background:#fff;color:#000" onclick="closeCam()">✖ Fermer</button>
-</div>
-</div>
+<div id="camBox"><video id="vCam" autoplay playsinline></video><div style="margin-top:12px"><button style="background:#FFD700" onclick="doSnap()">📸 Capturer</button><button style="background:#fff" onclick="closeCam()">✖ Fermer</button></div></div>
 <script>
-let mediaData=null,mediaType=null,stream=null,rec=null,chunks=[];
-function hF(input,type){
- let file=input.files[0]; if(!file)return;
- let r=new FileReader();
- r.onload=e=>{
-   mediaData=e.target.result; mediaType=type;
-   if(type=='image') document.getElementById('pv').innerHTML='<img src="'+mediaData+'" style="max-width:100%;border-radius:10px;margin-top:8px"><br><small>✅ Photo prête</small>';
-   else document.getElementById('pv').innerHTML='<video src="'+mediaData+'" controls style="max-width:100%;border-radius:10px;margin-top:8px"></video><br><small>✅ Vidéo prête</small>';
- };
- r.readAsDataURL(file);
-}
-async function openCam(){
- document.getElementById('camBox').style.display='flex';
-try{
-  stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
-  document.getElementById('v').srcObject=stream;
- }catch(e){alert("Caméra bloquée Chef! Autorise dans Chrome."); closeCam();}
-}
-function closeCam(){document.getElementById('camBox').style.display='none'; if(stream){stream.getTracks().forEach(t=>t.stop()); stream=null;}}
-function takePhoto(){
- let video=document.getElementById('v');
- let c=document.createElement('canvas'); c.width=video.videoWidth; c.height=video.videoHeight;
- c.getContext('2d').drawImage(video,0,0);
- mediaData=c.toDataURL('image/jpeg'); mediaType='image';
- document.getElementById('pv').innerHTML='<img src="'+mediaData+'" style="max-width:100%;border-radius:10px"><br><small>✅ Photo capturée</small>';
-closeCam();
-}
-let isRec=false;
-async function toggleVocal(){
- let btn=document.getElementById('btnVoc');
- if(!isRec){
-  try{
-   let s=await navigator.mediaDevices.getUserMedia({audio:true});
-   rec=new MediaRecorder(s); chunks=[];
-   rec.ondataavailable=e=>chunks.push(e.data);
-   rec.onstop=()=>{
-    let blob=new Blob(chunks,{type:'audio/webm'});
-    let r=new FileReader(); r.onload=e=>{mediaData=e.target.result; mediaType='audio'; document.getElementById('pv').innerHTML='<audio controls src="'+mediaData+'" style="width:100%"></audio><br><small>✅ Vocal prêt</small>';}; r.readAsDataURL(blob);
-    s.getTracks().forEach(t=>t.stop());
-   };
-   rec.start(); isRec=true; btn.innerText='⏹️ 
-STOP'; btn.style.background='#ff4444'; btn.style.color='#fff';
-  }catch(e){alert('Micro bloqué - autorise le micro');}
- }else{rec.stop(); isRec=false; btn.innerText='🎤 Vocal'; btn.style.background='#FFD700'; btn.style.color='#000';}
-}
-function publier(){
- let txt=document.getElementById('t').value.trim();
- if(!txt&&!mediaData){alert('Écris quelque chose Chef!');return;}
- let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');
- posts.unshift({texte:txt,media:mediaData,type:mediaType,date:new Date().toISOString()});
- localStorage.setItem('gmk_posts',JSON.stringify(posts));
- document.getElementById('t').value=''; 
-document.getElementById('pv').innerHTML=''; mediaData=null; mediaType=null;
- afficher(); alert('✅ Publié Chef!');
-}
-function afficher(){
- let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');
- document.getElementById('c').innerText=posts.length+' posts';
- let feed=document.getElementById('feed'); feed.innerHTML='';
- posts.forEach((p,i)=>{
-  let m='';
-  if(p.media){
-   if(p.type=='image') m='<img src="'+p.media+'" 
-style="max-width:100%;border-radius:8px;margin-top:8px">';
-   else if(p.type=='video') m='<video src="'+p.media+'" controls style="max-width:100%;border-radius:8px;margin-top:8px"></video>';
-   else if(p.type=='audio') m='<audio controls src="'+p.media+'" style="width:100%;margin-top:8px"></audio>';
-   else m='<img src="'+p.media+'" style="max-width:100%">';
-  }
-  let d=document.createElement('div'); d.className='post';
-  d.innerHTML='<div>'+(p.texte||'')+'</div>'+m+'<div style="font-size:11px;color:#aaa;margin-top:5px">'+new Date(p.date).toLocaleString()+'</div><button onclick="supp('+i+')" style="background:#ff4444;color:#fff;padding:6px 12px;border-radius:15px;margin-top:6px;width:auto">🗑️</button>';
-  feed.appendChild(d);
- });
-}
-function supp(i){if(!confirm('Supprimer?'))return; let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]'); posts.splice(i,1); localStorage.setItem('gmk_posts',JSON.stringify(posts)); afficher();}
-afficher();
-</script>
-</body>
-</html>
+let 
+curMedia=null,curType=null,stream=null,rec=null,chunks=[],recOn=false;
+const pv=document.getElementById('pv'), txt=document.getElementById('txt'), feed=document.getElementById('feed'), cnt=document.getElementById('cnt');
+document.getElementById('f1').addEventListener('change',function(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=function(ev){curMedia=ev.target.result;curType='image';pv.innerHTML='<img src="'+curMedia+'"><div>✅ Photo prête - clique Publier</div>';};r.readAsDataURL(f);});
+document.getElementById('f2').addEventListener('change',function(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=function(ev){curMedia=ev.target.result;curType='video';pv.innerHTML='<video src="'+curMedia+'" controls></video><div>✅ Vidéo prête - clique Publier</div>';};r.readAsDataURL(f);});
+async function openCam(){document.getElementById('camBox').style.display='flex';try{stream=await 
+navigator.mediaDevices.getUserMedia({video:true});document.getElementById('vCam').srcObject=stream;}catch(err){alert('Caméra bloquée: '+err.message);closeCam();}}
+function closeCam(){document.getElementById('camBox').style.display='none';if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}}
+function doSnap(){let v=document.getElementById('vCam');let c=document.createElement('canvas');c.width=v.videoWidth||640;c.height=v.videoHeight||480;c.getContext('2d').drawImage(v,0,0);curMedia=c.toDataURL('image/jpeg');curType='image';pv.innerHTML='<img src="'+curMedia+'"><div>✅ Photo capturée - clique Publier</div>';closeCam();}
+async function toggleVoc(){let b=document.getElementById('bVoc');if(!recOn){try{let s=await navigator.mediaDevices.getUserMedia({audio:true});rec=new MediaRecorder(s);chunks=[];rec.ondataavailable=function(e)
+{chunks.push(e.data);};rec.onstop=function(){let blob=new Blob(chunks,{type:'audio/webm'});let r=new FileReader();r.onload=function(ev){curMedia=ev.target.result;curType='audio';pv.innerHTML='<audio controls src="'+curMedia+'" style="width:100%"></audio><div>✅ Vocal prêt - clique Publier</div>';};r.readAsDataURL(blob);s.getTracks().forEach(t=>t.stop());};rec.start();recOn=true;b.textContent='⏹️ STOP';b.style.background='#ff4444';b.style.color='#fff';}catch(e){alert('Micro bloqué: '+e.message);}}else{rec.stop();recOn=false;let b2=document.getElementById('bVoc');b2.textContent='🎤 Vocal';b2.style.background='#FFD700';b2.style.color='#000';}}
+function loadPosts(){try{return JSON.parse(localStorage.getItem('gmk46')||'[]');}catch(e){return [];}}
+function savePosts(p){localStorage.setItem('gmk46',JSON.stringify(p));}
+function render(){let posts=loadPosts();cnt.textContent=posts.length+' posts';feed.innerHTML='';posts.forEach(function(p,i){let mediaHtml='';if(p.media){if(p.type==='image')mediaHtml='<img src="'+p.media+'" style="max-width:100%;border-radius:8px;margin-top:8px">';else if(p.type==='video')mediaHtml='<video src="'+p.media+'" controls style="max-width:100%;border-radius:8px;margin-top:8px"></video>';else if(p.type==='audio')mediaHtml='<audio src="'+p.media+'" controls style="width:100%;margin-top:8px"></audio>';}let d=document.createElement('div');d.className='post';d.innerHTML='<div>'+(p.text||'')+'</div>'+mediaHtml+'<div style="font-size:11px;color:#aaa;margin-top:6px">'+p.date+' <button onclick="delPost('+i+')" style="background:#ff4444;color:#fff;padding:4px 8px;font-size:11px;width:auto;margin-left:10px">X Suppr</button></div>';feed.appendChild(d);});}
+function delPost(i){let p=loadPosts();p.splice(i,1);savePosts(p);render();}
+document.getElementById('btnPub').addEventListener('click',function(){let t=txt.value.trim();if(!t&&!curMedia){alert('Écris quelque chose Chef!');return;}let posts=loadPosts();posts.unshift({text:t,media:curMedia,type:curType,date:new Date().toLocaleString()});savePosts(posts);txt.value='';pv.innerHTML='';curMedia=null;curType=null;document.getElementById('msg').textContent='✅ Publié!';setTimeout(function(){document.getElementById('msg').textContent='';},2000);render();});
+render();
+</script></body></html>
 
 
-       
+ 
