@@ -1,113 +1,49 @@
 <!DOCTYPE html>
-<!-- V5.6 CLEAN FIX CHEF -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Fil GMK V5.6 Clean 60s</title>
 <style>
-*{box-sizing:border-box}
-body{background:#0a1931;color:#fff;font-family:-apple-system,Arial;margin:0}
-.top{background:#000;color:#FFD700;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;border-bottom:2px solid #FFD700}
-.box{background:#0f274e;margin:12px;border:2px solid #FFD700;border-radius:16px;padding:14px}
-textarea{width:100%;background:#000;color:#fff;border:1px solid #333;border-radius:12px;padding:12px;font-size:15px;min-height:80px;resize:vertical;outline:none;white-space:pre-wrap;word-wrap:break-word}
-.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.actions button{padding:10px 16px;border-radius:22px;border:none;font-weight:bold;font-size:14px;cursor:pointer}
-.b-photo{background:#FFD700;color:#000}.b-cam{background:#00c853;color:#fff}.b-video{background:#FFD700;color:#000}.b-vocal{background:#FFD700;color:#000}
-.preview img,.preview video{max-width:100%;border-radius:12px;margin-top:10px;width:100%}
-#btnPub{background:#FFD700;color:#000;width:100%;padding:15px;border-radius:25px;border:none;font-weight:bold;font-size:18px;margin-top:12px;cursor:pointer}
-.post{background:#0f274e;border:1px solid #FFD700;border-radius:16px;padding:14px;margin:12px;color:#fff;word-wrap:break-word}
-.post-actions{display:flex;gap:10px;margin-top:12px;border-top:1px solid #333;padding-top:10px;flex-wrap:wrap}
-.post-actions 
-button{background:none;border:none;color:#aaa;font-size:13px;cursor:pointer}
+*{box-sizing:border-box}body{background:#0a1931;color:#fff;font-family:Arial;margin:0}.top{background:#000;color:#FFD700;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}.box{background:#0f274e;margin:12px;border:2px solid #FFD700;border-radius:16px;padding:14px}textarea{width:100%;background:#000;color:#fff;border:1px solid #333;border-radius:12px;padding:12px;font-size:15px;min-height:80px;outline:none}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.actions button{padding:10px 16px;border-radius:22px;border:none;font-weight:bold;cursor:pointer}.b-photo{background:#FFD700;color:#000}.b-
+cam{background:#00c853;color:#fff}.b-video{background:#2962ff;color:#fff}.b-vocal{background:#ff1744;color:#fff}.b-send{background:#fff;color:#000;margin-left:auto}.preview{margin-top:12px;border-radius:12px;overflow:hidden;display:none}.preview img,.preview video{width:100%;max-height:400px;object-fit:cover}.feed{margin:12px}.card{background:#112a52;border:1px solid #1e3a6a;border-radius:14px;padding:12px;margin-bottom:12px}.card img,.card video{width:100%;border-radius:10px;margin-top:8px}.muted{color:#8aa0c0;font-size:13px}
 </style>
 </head>
 <body>
-<div class="top">
-<span onclick="location.href='/'">← GMK</span>
-<b>Fil GMK V5.6 📸60s CLEAN</b>
-<span id="cnt">0</span>
-</div>
+<div class="top"><b>⚡ GMK FIL V5.6</b><span id="status" class="muted">Prêt</span></div>
 <div class="box">
-<textarea id="txt" placeholder="Quoi de neuf Chef?"></textarea>
+<textarea id="txt" placeholder="Quoi de neuf Chef? Texte, photo, vidéo 60s, vocal..."></textarea>
 <div class="actions">
-<button class="b-photo" onclick="document.getElementById('fPhoto').click()">📷 Photo HD</button>
-<button class="b-cam" onclick="startCamera()">🎥 Caméra</button>
-<button class="b-video" onclick="document.getElementById('fVideo').click()">🎞️ Vidéo 60s</button>
-<button class="b-vocal" id="btnMic" onclick="toggleMic()">🎤 Vocal 60s</button>
+<button class="b-photo" onclick="pickPhoto()">📷 
+Photo</button>
+<button class="b-cam" onclick="pickCam()">🎥 Cam</button>
+<button class="b-video" onclick="pickVideo()">🎞️ Vidéo 60s</button>
+<button class="b-vocal" onclick="recVocal()">🎤 Vocal</button>
+<button class="b-send" onclick="publish()">Publier</button>
 </div>
+<div class="preview" id="preview"></div>
+<div id="vocalInfo" class="muted" style="margin-top:8px;display:none"></div>
+</div>
+<div class="feed" id="feed"></div>
 <input type="file" id="fPhoto" accept="image/*" hidden>
 <input type="file" id="fVideo" accept="video/*" hidden>
-<div id="preview" class="preview"></div>
-<div id="camBox" style="display:none;margin-top:10px">
-<video id="cam" autoplay playsinline style="width:100%;border-radius:12px"></video><br>
-<button onclick="takePhoto()" style="background:#FFD700;color:#000;padding:10px 20px;border-radius:20px;border:none;margin-top:8px">📸 Capturer</button>
-<button onclick="stopCamera()" style="background:#444;color:#fff;padding:10px 20px;border-radius:20px;border:none;margin-left:8px">Fermer</button>
-</div>
-<div id="recBox" style="display:none;background:#000;border:1px solid #ff3040;border-radius:12px;padding:10px;margin-top:10px;text-align:center">
-<div style="color:#ff3040;font-weight:bold">🔴 REC <span id="timer">00:00</span> / 01:00</div>
-</div>
-<button id="btnPub" onclick="publier()">🚀 Publier sur le fil</button>
-</div>
-<div id="feed"></div>
 <script>
-let curMedia=null,curType=null,mediaStream=null,recorder=null,audioChunks=[],isRecording=false,editIndex=-1,timerInt=null,sec=0;
-function compressImage(file,cb){
- let r=new FileReader();
- r.onload=e=>{
-  let img=new Image();
-  img.onload=()=>{
-   let max=1280,w=img.width,h=img.height;
-   if(w>max||h>max){if(w>h){h=h*max/w;w=max;}else{w=w*max/h;h=max;}}
-   let c=document.createElement('canvas');c.width=w;c.height=h;
-c.getContext('2d').drawImage(img,0,0,w,h);
-   cb(c.toDataURL('image/jpeg',0.7));
-  };
-  img.src=e.target.result;
- };
- r.readAsDataURL(file);
-}
-document.getElementById('fPhoto').addEventListener('change',e=>{
- let f=e.target.files[0];if(!f)return;
- showP(`<div style=color:#FFD700>⏳ Compression...</div>`);
- compressImage(f,data=>{curMedia=data;curType='image';showP(`<img src="${curMedia}"><div style=color:#0f0>✅ Photo prête</div>`);});
-});
-document.getElementById('fVideo').addEventListener('change',e=>{
- let f=e.target.files[0];if(!f)return;
- if(f.size>80000000){alert('Trop lourd '+Math.round(f.size/1000000)+'Mo max 80Mo');return;}
- let 
-vid=document.createElement('video');vid.preload='metadata';
- vid.onloadedmetadata=()=>{
-  if(vid.duration>62){alert('Trop longue '+Math.round(vid.duration)+'s max 60s');return;}
-  let r=new FileReader();
-  r.onload=ev=>{curMedia=ev.target.result;curType='video';showP(`<video src="${curMedia}" controls></video><div style=color:#0f0>✅ Vidéo ${Math.round(vid.duration)}s prête</div>`);};
-  r.readAsDataURL(f);
- };
- vid.src=URL.createObjectURL(f);
-});
-function showP(h){document.getElementById('preview').innerHTML=h;}
-function getPosts(){try{return JSON.parse(localStorage.getItem('gmk_premium_v5')||'[]');}catch(e){return[];}}
-function savePosts(p){localStorage.setItem('gmk_premium_v5',JSON.stringify(p.slice(0,50)));}
-async function startCamera()
-{try{mediaStream=await navigator.mediaDevices.getUserMedia({video:true});document.getElementById('cam').srcObject=mediaStream;document.getElementById('camBox').style.display='block';}catch(e){alert('Caméra bloquée');}}
-function stopCamera(){if(mediaStream)mediaStream.getTracks().forEach(t=>t.stop());document.getElementById('camBox').style.display='none';}
-function takePhoto(){let v=document.getElementById('cam');let c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);curMedia=c.toDataURL('image/jpeg',0.7);curType='image';showP(`<img src="${curMedia}"><div style=color:#0f0>✅ Photo prête</div>`);stopCamera();}
-async function toggleMic(){let btn=document.getElementById('btnMic');if(!isRecording){try{let stream=await navigator.mediaDevices.getUserMedia({audio:true});recorder=new MediaRecorder(stream,{mimeType:'audio/
-webm'});audioChunks=[];sec=0;recorder.ondataavailable=e=>audioChunks.push(e.data);recorder.onstop=()=>{let blob=new Blob(audioChunks,{type:'audio/webm'});let reader=new FileReader();reader.onload=ev=>{curMedia=ev.target.result;curType='audio';showP(`<audio src="${curMedia}" controls></audio><div style=color:#0f0>✅ Vocal ${sec}s prêt</div>`);};reader.readAsDataURL(blob);stream.getTracks().forEach(t=>t.stop());clearInterval(timerInt);document.getElementById('recBox').style.display='none';btn.textContent='🎤 Vocal 60s';isRecording=false;};recorder.start(100);isRecording=true;btn.textContent='⏹️ Stop';document.getElementById('recBox').style.display='block';timerInt=setInterval(()=>{sec++;let m=String(Math.floor(sec/60)).padStart(2,'0');let s=String(sec%60).padStart(2,'0');document.getElementById('timer').textContent=m+':'+s;if(sec>=60)recorder.stop();},1000);}catch(e){alert('Micro bloqué');}}else{recorder.stop();}}
-function publier(){let  
-text=document.getElementById('txt').value.trim();if(!text&&!curMedia){alert('Écris ou ajoute média');return;}let posts=getPosts();if(editIndex>=0){posts[editIndex].text=text;if(curMedia){posts[editIndex].media=curMedia;posts[editIndex].type=curType;}editIndex=-1;document.getElementById('btnPub').textContent='🚀 Publier sur le fil';}else{posts.unshift({id:Date.now(),text:text,media:curMedia,type:curType,likes:0,liked:false,comments:[],date:new Date().toLocaleString()});}savePosts(posts);document.getElementById('txt').value='';document.getElementById('preview').innerHTML='';curMedia=null;curType=null;render();}
-function re
-{if(p.type==='image')mediaHtml=`<div style=margin-top:8px><img src="${p.media}" style=width:100%;border-radius:12px></div>`;else if(p.type==='video')mediaHtml=`<div style=margin-top:8px><video src="${p.media}" controls style=width:100%;border-radius:12px></video></div>`;else if(p.type==='audio')mediaHtml=`<div style=margin-top:8px><audio src="${p.media}" controls style=width:100%></audio></div>`;}let comHtml=p.comments.map(c=>`<div style=background:#000;padding:6px 10px;border-radius:10px;margin-top:6px;font-size:13px>💬 ${c}</div>`).join('');let div=document.createElement('div');div.className='post';div.innerHTML=`<div style=font-size:15px;white-space:pre-wrap>${p.text||''}</div>${mediaHtml}<div class=post-actions><button onclick="likePost(${i})">❤️ ${p.likes||0}</button><button onclick="commentPost(${i})">💬 ${p.comments.length}</button><button onclick="editPost(${i})" style=color:#FFD700>✏️ Corriger</button><button onclick="deletePost(${i})" style=color:#ff4444>🗑️ Supprimer</button></div><div>${comHtml}</div><div nder(){let posts=getPosts();document.getElementById('cnt').textContent=posts.length+' posts';let feed=document.getElementById('feed');feed.innerHTML='';posts.forEach((p,i)=>{let mediaHtml='';if(p.media)                                                                                                                                                                      
-style=font-size:11px;color:#888;margin-top:8px>${p.date}</div>`;feed.appendChild(div);});}
-function likePost(i){let p=getPosts();p[i].likes++;savePosts(p);render();}
-function commentPost(i){let t=prompt('Commentaire:');if(!t)return;let p=getPosts();p[i].comments.push(t);savePosts(p);render();}
-function deletePost(i){if(!confirm('Supprimer?'))return;let p=getPosts();p.splice(i,1);savePosts(p);render();}
-function editPost(i){let =getPosts()[i];document.getElementById('txt').value=p.text;curMedia=p.media;curType=p.type;if(p.media){if(p.type==='image')showP(`<img src="${p.media}"><div style=color:#FFD700>✏️ Mode correction</div>`);else if(p.type==='video')showP(`<video src="${p.media}" controls></video>`);else if(p.type==='audio')showP(`<audio src="$
-{p.media}" controls></audio>`);}editIndex=i;document.getElementById('btnPub').textContent='✅ Enregistrer correction';window.scrollTo(0,0);}
-render();
+let mediaData=null,mediaType=null;
+function setStatus(t){document.getElementById('statu s').textContent=t}
+function pickPhoto()
+{document.getElementById('fPhoto').click()}
+function pickCam(){let i=document.getElementById('fPhoto');i.setAttribute('capture','environment');i.click()}
+function pickVideo(){document.getElementById('fVideo').click()}
+document.getElementById('fPhoto').addEventListener('change',e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{mediaData=r.result;mediaType='photo';showPreview('<img src="'+mediaData+'">');setStatus('Photo prête')};r.readAsDataURL(f);});
+document.getElementById('fVideo').addEventListener('change',e=>{let f=e.target.files[0];if(!f)return;if(f.size>60*1024*1024){alert('>60MB');return;}let v=document.createElement('video');v.preload='metadata';v.onloadedmetadata=()=>{if(v.duration>62){alert('Trop longue '+Math.round(v.duration)+'s Max 60s');return;}let r=new FileReader();r.onload=()=>{mediaData=r.result;mediaType='video';showPreview('<video src="'+mediaData+'" controls></video>');setStatus('Vidéo 60s 
+prête')};r.readAsDataURL(f);};v.src=URL.createObjectURL(f);});
+function showPreview(html){let p=document.getElementById('preview');p.innerHTML=html;p.style.display='block';}
+let rec=null,chunks=[];function recVocal(){if(rec&&rec.state==='recording'){rec.stop();return;}navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{chunks=[];rec=new MediaRecorder(s);rec.ondataavailable=e=>chunks.push(e.data);rec.onstop=()=>{let blob=new Blob(chunks,{type:'audio/webm'});let r=new FileReader();r.onload=()=>{mediaData=r.result;mediaType='vocal';showPreview('<audio controls src="'+mediaData+'"></audio>');setStatus('Vocal prêt')};r.readAsDataURL(blob);};rec.start();setStatus('🔴 REC... reclique stop');let sec=0;let it=setInterval(()=>{sec++;document.getElementById('vocalInfo').style.display='block';document.getElementById('vocalInfo').textContent='🔴 '+sec+'s / 60s';if(sec>=60){rec.stop();clearInterval(it);}if(rec.state!=='recording')clearInterval(it);},1000);}).catch(()=>alert('Micro bloqué'));}
+function publish(){let text=document.getElementById('txt').value.trim();if(!text&&!mediaData){alert('Ajoute texte ou média');return;}let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');posts.unshift({id:Date.now(),text:text,media:mediaData,type:mediaType,date:new Date().toLocaleString()});localStorage.setItem('gmk_posts',JSON.stringify(posts));document.getElementById('txt').value='';mediaData=null;mediaType=null;document.getElementById('preview').style.display='none';document.getElementById('vocalInfo').style.display='none';setStatus('Publié ✅');render();}
+function render(){let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');let f=document.getElementById('feed');if(posts.length===0){f.innerHTML='<div class="muted" style="text-align:center;padding:20px">Aucun post encore</div>';return;}f.innerHTML=posts.map(p=>{let m='';if(p.type==='photo')m='<img src="'+p.media+'">';if(p.type==='video')m='<video src="'+p.media+'" controls></
+video>';if(p.type==='vocal')m='<audio controls src="'+p.media+'" style="width:100%"></audio>';return '<div class="card"><div>'+(p.text||'')+'</div>'+m+'<div class="muted" style="margin-top:8px">'+p.date+'</div></div>';}).join('');}
+render();setStatus('V5.6 Prêt - 60s max');
 </script>
 </body>
 </html>
-                                                                                                                                                                                                
-                                                                                                                                                                                                
-                                                                                                                                                                                                
+  
