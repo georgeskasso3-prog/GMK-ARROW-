@@ -3,70 +3,106 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fil GMK V3.8.1 - ABONNES FIX</title>
+<title>Fil GMK V3.9 - COMPLET</title>
 <style>
-body{background:#0a1931;color:white;font-family:Arial;margin:0;padding-bottom:100px}
+body{background:#0a1931;color:white;font-family:Arial;margin:0;padding-bottom:120px}
 .header{background:#0a1931;color:#FFD700;padding:12px;display:flex;justify-content:space-between;border-bottom:2px solid #FFD700;position:sticky;top:0;z-index:10}
 .header a{color:#FFD700;text-decoration:none;font-weight:bold}
-.post-box{background:#112240;margin:15px;padding:15px;border-radius:16px;border:1px solid #FFD700}
-.post-box textarea{width:100%;height:80px;background:#0a1931;color:white;border:1px solid #777;border-radius:10px;padding:12px;box-sizing:border-box;font-size:17px}
-.btns{display:flex;gap:8px;margin-top:12px}
-.btns button{padding:12px 16px;border-radius:25px;border:none;font-weight:bold;font-size:14px;cursor:pointer;flex:1}
-.card{background:#112240;margin:15px;padding:15px;border-radius:16px;border-left:4px solid #FFD700}
-.card-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.card-head img{width:42px;height:42px;border-radius:50%;border:2px solid #FFD700;object-fit:cover}
-.card p{font-size:15px;line-height:1.5;white-space:pre-wrap}
-.interact{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
-.interact b{cursor:pointer;padding:8px 10px;background:#0a1931;border-radius:20px;font-size:12px;border:1px solid #333}
-img,video{width:100%;border-radius:12px;margin-top:10px;max-height:400px;object-fit:contain}
-audio{width:100%;margin-top:10px}
-#timer{color:red;font-weight:bold;display:none;margin-top:8px}
+.post-box{background:#112240;margin:12px;padding:14px;border-radius:16px;border:1px solid #FFD700}
+.post-box textarea{width:100%;height:80px;background:#0a1931;color:white;border:1px solid #777;border-radius:10px;padding:12px;box-sizing:border-box;font-size:16px}
+.btns{display:grid;grid-template-columns:1fr
+1fr;gap:8px;margin-top:12px}
+.btns button{padding:14px;border-radius:25px;border:none;font-weight:bold;font-size:14px;cursor:pointer}
+.card{background:#112240;margin:12px;padding:14px;border-radius:16px;border-left:4px solid #FFD700}
+.card-head{display:flex;align-items:center;gap:10px}
+.card-head img{width:40px;height:40px;border-radius:50%;border:2px solid #FFD700;object-fit:cover}
+.card p{margin:10px 0;white-space:pre-wrap}
+.interact{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.interact b{background:#0a1931;padding:7px 10px;border-radius:20px;font-size:12px;border:1px solid #333;cursor:pointer}
+video,img{width:100%;border-radius:12px;margin-top:8px}
+audio{width:100%;margin-top:8px}
+#vPreview,#pPreview,#camPreview{margin-top:10px}
+#timer{color:red;font-weight:bold;display:none;text-align:center;margin-top:8px}
+8px}
 </style>
 </head>
 <body>
-<div class="header"><b>Fil GMK V3.8.1 ✅</b><a href="carrefour.html">← Carrefour</a></div>
+<div class="header"><b>Fil GMK V3.9 ✅</b><a href="carrefour.html">← Carrefour</a></div>
 <div class="post-box">
-<textarea id="txt" placeholder="Quoi de neuf Chef? Tes abonnés t'écoutent!"></textarea>
+<textarea id="txt" placeholder="Quoi de neuf Chef?"></textarea>
 <input type="file" id="file" accept="image/*,video/*" style="display:none">
-<div id="preview"></div><div id="vPreview"></div><div id="timer">🔴 REC 00:00</div>
+<input type="file" id="camFile" accept="video/*" capture="environment" style="display:none">
+<div id="pPreview"></div>
+<div id="camPreview"></div>
+<div id="vPreview"></div>
+<div id="timer">🔴 00:00</div>
 <div class="btns">
-<button onclick="openFile()" style="background:#FFD700;color:black">📁 Photo</button>
+<button onclick="openFile()" style="background:#FFD700;color:black">🖼️ Photo</button>
+<button onclick="document.getElementById('camFile').click()" style="background:#FFD700;color:black">📹 Caméra</button>
 <button onclick="toggleVoice()" id="vBtn" style="background:#FFD700;color:black">🎙️ Vocal</button>
 <button onclick="doPost()" style="background:white;color:black">🚀 Publier</button>
 </div>
 </div>
 <div id="feed"></div>
 <script>
-var photoData="",photoType="",vocalData="",recorder=null,chunks=[],isRec=false,timerInt=null,sec=0;
-function getProfilePic(){return localStorage.getItem('GMK_PROFILE_PIC')||'';}
+var photoData="",photoType="",vocalData="",recorder=null,chunks=[],isRec=false,tInt=null,sec=0;
+function getPic(){return localStorage.getItem('GMK_PROFILE_PIC')||'';}
 function openFile(){document.getElementById('file').click();}
-document.getElementById('file').onchange=function(e){var f=e.target.files[0];if(!f)return;photoType=f.type;var r=new FileReader();r.onload=function(ev){photoData=ev.target.result;if(f.type.indexOf('video')>-1)document.getElementById('preview').innerHTML='<video src="'+photoData+'" controls></video><br><b onclick="clearPhoto()" style="color:#ff6666">❌ Retirer</b>';else document.getElementById('preview').innerHTML='<img src="'+photoData+'"><br><b onclick="clearPhoto()" style="color:#ff6666">❌ Retirer</b>';};r.readAsDataURL(f);};
-function clearPhoto(){photoData="";document.getElementById('preview').innerHTML="";document.getElementById('file').value="";}
-function startTimer()
-{sec=0;document.getElementById('timer').style.display='block';timerInt=setInterval(function(){sec++;var m=String(Math.floor(sec/60)).padStart(2,'0');var s=String(sec%60).padStart(2,'0');document.getElementById('timer').innerText='🔴 REC '+m+':'+s;if(sec>=120)toggleVoice();},1000);}
-function stopTimer(){clearInterval(timerInt);document.getElementById('timer').style.display='none';}
-function toggleVoice(){if(isRec){if(recorder&&recorder.state==='recording')recorder.stop();return;}navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){chunks=[];recorder=new MediaRecorder(stream);isRec=true;document.getElementById('vBtn').innerText='⏹️ Stop';document.getElementById('vBtn').style.background='red';startTimer();recorder.ondataavailable=function(e){if(e.data&&e.data.size>0)chunks.push(e.data);};recorder.onstop=function(){isRec=false;stopTimer();var blob=new Blob(chunks,{type:recorder.mimeType});var r=new FileReader();r.onload=function(ev)
-{vocalData=ev.target.result;document.getElementById('vPreview').innerHTML='<audio controls src="'+vocalData+'"></audio><br><b onclick="clearVocal()" style="color:#ff6666">❌ Retirer</b>';};r.readAsDataURL(blob);document.getElementById('vBtn').innerText='🎙️ Vocal';document.getElementById('vBtn').style.background='#FFD700';stream.getTracks().forEach(function(t){t.stop();});};recorder.start(200);}).catch(function(err){alert('Micro bloqué! '+err.message);});}
-function clearVocal(){vocalData="";document.getElementById('vPreview').innerHTML="";}
-function saveFeed(){localStorage.setItem('GMK_FEED_V381',document.getElementById('feed').innerHTML);}
-function loadFeed(){var s=localStorage.getItem('GMK_FEED_V381')||'';if(s)document.getElementById('feed').innerHTML=s;}
-function doPost(){
- var text=document.getElementById('txt').value.trim();
- if(text==''&&photoData==''&&vocalData=='')
-{alert('Ecris quelque chose!');return;}
- var media=''; if(photoData){if(photoType.indexOf('video')>-1) media+='<video src="'+photoData+'" controls playsinline></video>'; else media+='<img src="'+photoData+'">';} if(vocalData) media+='<audio controls src="'+vocalData+'"></audio>';
- var pic=getProfilePic(); var avatar=pic?'<img src="'+pic+'">':'<div style="width:42px;height:42px;border-radius:50%;background:#FFD700;color:black;display:flex;align-items:center;justify-content:center;font-weight:bold">GMK</div>';
- var div=document.createElement('div'); div.className='card';
- var now=new Date().toLocaleTimeString();
- div.innerHTML='<div class="card-head">'+avatar+'<div><b>Georges-Marie 🔒</b><br><small style="color:#FFD700">'+now+'</small></div></div><p>'+text.replace(/</g,'&lt;')+'</p>'+media+'<div class="interact"><b onclick="doLike(this)">❤️ Like (<span>0</span>)</b><b onclick="doComment(this)">💬 
-Commenter</b><b onclick="doShare(this)">↗️ Partager</b></div><div class="comments"></div>';
- var feed=document.getElementById('feed'); feed.insertBefore(div, feed.firstChild); document.getElementById('txt').value=''; clearPhoto(); clearVocal(); saveFeed(); alert('✅ Publié! Tes abonnés vont voir!');
+document.getElementById('file').onchange=function(e){
+ var f=e.target.files[0]; if(!f) return; photoType=f.type;
+ var r=new FileReader(); r.onload=function(ev){
+  photoData=ev.target.result;
+  if(f.type.includes('video')) 
+document.getElementById('pPreview').innerHTML='<video src="'+photoData+'" controls></video><br><b onclick="clearP()" style="color:#f55">❌ Retirer</b>';
+  else document.getElementById('pPreview').innerHTML='<img src="'+photoData+'"><br><b onclick="clearP()" style="color:#f55">❌ Retirer</b>';
+ }; r.readAsDataURL(f);
+};
+document.getElementById('camFile').onchange=function(e){
+ var f=e.target.files[0]; if(!f) return; photoType=f.type;
+ var r=new FileReader(); r.onload=function(ev){
+  photoData=ev.target.result;
+  document.getElementById('camPreview').innerHTML='<video src="'+photoData+'" controls></video><br><b onclick="clearCam()" style="color:#f55">❌ Retirer vidéo</b>';
+ }; r.readAsDataURL(f);
+};
+function clearP()
+{photoData="";document.getElementById('pPreview').innerHTML="";document.getElementById('file').value="";}
+function clearCam(){photoData="";document.getElementById('camPreview').innerHTML="";document.getElementById('camFile').value="";}
+function startTimer(){sec=0;document.getElementById('timer').style.display='block';tInt=setInterval(function(){sec++;var m=String(Math.floor(sec/60)).padStart(2,'0');var s=String(sec%60).padStart(2,'0');document.getElementById('timer').innerText='🔴 REC '+m+':'+s; if(sec>=120) toggleVoice();},1000);}
+function stopTimer(){clearInterval(tInt);document.getElementById('timer').style.display='none';}
+function toggleVoice(){
+ if(isRec){ if(recorder&&recorder.state=='recording') recorder.stop(); return; }
+ navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+chunks=[]; recorder=new MediaRecorder(stream); isRec=true;
+  document.getElementById('vBtn').innerText='⏹️ Stop'; document.getElementById('vBtn').style.background='red'; startTimer();
+  recorder.ondataavailable=function(e){ if(e.data.size>0) chunks.push(e.data); };
+  recorder.onstop=function(){
+   isRec=false; stopTimer();
+   var blob=new Blob(chunks,{type:recorder.mimeType});
+   var r=new FileReader(); r.onload=function(ev){vocalData=ev.target.result; document.getElementById('vPreview').innerHTML='<audio controls src="'+vocalData+'"></audio><br><b onclick="clearV()" style="color:#f55">❌ Retirer vocal</b>';}; r.readAsDataURL(blob);
+   document.getElementById('vBtn').innerText='🎙️ Vocal'; document.getElementById('vBtn').style.background='#FFD700'; stream.getTracks().forEach(function(t){t.stop();});
+  };
+  recorder.start(200);
+}).catch(function(err){alert('Micro bloqué: '+err.message);});
 }
-function doLike(el){var sp=el.querySelector('span');sp.innerText=parseInt(sp.innerText)+1;saveFeed();}
-function doComment(el){var t=prompt('Ton commentaire:');if(!t)return;var box=el.parentElement.parentElement.querySelector('.comments');var p=document.createElement('p');p.style.background='#0a1931';p.style.padding='8px';p.style.borderRadius='8px';p.style.marginTop='8px';p.innerText='Toi: '+t;box.appendChild(p);saveFeed();}
-function doShare(el){var card=el.closest('.card');var txt=card.querySelector('p').innerText||'Regarde ce post!';var url=window.location.href;if(navigator.share){navigator.share({title:'GMK ARROW
-  ',text:txt,url:url});}else{navigator.clipboard.writeText(url+'\n\n'+txt).then(function(){alert('🔗 Lien copié! Envoie à tes abonnés!\n'+url);});}}
-loadFeed();
+function clearV(){vocalData="";document.getElementById('vPreview').innerHTML="";}
+function save(){localStorage.setItem('GMK_FEED_V39',document.getElementById('feed').innerHTML);}
+function load(){var s=localStorage.getItem('GMK_FEED_V39')||'';if(s) document.getElementById('feed').innerHTML=s;}
+function doPost(){
+ var t=document.getElementById('txt').value.trim();
+ if(t==''&&photoData==''&&vocalData==''){alert('Ecris ou ajoute media!');return;}
+ var media=''; if(photoData){ if(photoType.includes('video')) media+='<video src="'+photoData+'" controls playsinline></video>'; else media+='<img src="'+photoData+'">'; } if(vocalData) media+='<audio controls src="'+vocalData+'"></audio>';
+var pic=getPic(); var av=pic?'<img src="'+pic+'">':'<div style="width:40px;height:40px;border-radius:50%;background:#FFD700;color:black;display:flex;align-items:center;justify-content:center;font-weight:bold">GM</div>';
+ var d=document.createElement('div'); d.className='card';
+ d.innerHTML='<div class="card-head">'+av+'<div><b>Georges-Marie 🔒</b><br><small style="color:#FFD700">À l instant - '+new Date().toLocaleTimeString()+'</small></div></div><p>'+t.replace(/</g,'&lt;')+'</p>'+media+'<div class="interact"><b onclick="like(this)">❤️ Like (<span>0</span>)</b><b onclick="comment(this)">💬 Commente</b><b onclick="share(this)">↗️ Partage</b></div><div class="coms"></div>';
+ var f=document.getElementById('feed'); f.insertBefore(d,f.firstChild);
+ document.getElementById('txt').value=''; clearP(); clearCam(); clearV(); save();
+}
+function like(el){var 
+s=el.querySelector('span');s.innerText=parseInt(s.innerText)+1;save();}
+function comment(el){var t=prompt('Commentaire:'); if(!t) return; var b=el.closest('.card').querySelector('.coms'); var p=document.createElement('p'); p.style.background='#0a1931'; p.style.padding='8px'; p.style.borderRadius='8px'; p.style.marginTop='6px'; p.innerText='Toi: '+t; b.appendChild(p); save();}
+function share(el){var txt=el.closest('.card').querySelector('p').innerText; var url=location.href; if(navigator.share) navigator.share({title:'GMK',text:txt,url:url}); else {navigator.clipboard.writeText(url+' - '+txt); alert('Lien copié!');}}
+load();
 </script>
 </body>
 </html>
+ 
