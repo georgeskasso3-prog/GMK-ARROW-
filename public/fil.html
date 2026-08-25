@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fil GMK V3.5 SAVE</title>
+<title>Fil GMK V3.7 MAC+PHONE</title>
 <style>
 body{background:#0a1931;color:white;font-family:Arial;margin:0;padding-bottom:90px}
 .header{background:#0a1931;color:#FFD700;padding:12px;display:flex;justify-content:space-between;border-bottom:2px solid #FFD700;position:sticky;top:0;z-index:10}
@@ -12,104 +12,100 @@ body{background:#0a1931;color:white;font-family:Arial;margin:0;padding-bottom:90
 .post-box textarea{width:100%;height:80px;background:#0a1931;color:white;border:1px solid #777;border-radius:10px;padding:12px;box-sizing:border-box;font-size:17px}
 .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .btns button{padding:12px 16px;border-radius:25px;border:none;font-weight:bold;font-size:14px;cursor:pointer}
-.card{background:#112240;margin:15px;padding:15px;border-radius:16px;border-left:4px solid #FFD700;animation:pop.3s}
-@keyframes pop{0%{transform:scale(.9)}100%{transform:scale(1)}}
+.card{background:#112240;margin:15px;padding:15px;border-radius:16px;border-left:4px solid #FFD700}
 .card p{font-size:15px;line-height:1.5;white-space:pre-wrap}
 .interact{margin-top:10px;display:flex;gap:15px}
 .interact b{cursor:pointer;padding:5px}
 img,video{width:100%;border-radius:12px;margin-top:10px}
 audio{width:100%;margin-top:10px}
-.save-info{text-align:center;color:#FFD700;font-size:12px;padding:10px}
+#timer{color:red;font-weight:bold;display:none;margin-top:8px}
+.mac-info{background:#FFD700;color:black;padding:8px;border-radius:8px;font-size:12px;margin-top:8px;text-align:center}
 </style>
 </head>
 <body>
-<div class="header"><b>Fil GMK 🔒 V3.5 SAVE</b><a href="carrefour.html">← Carrefour</a></div>
+<div class="header"><b>Fil GMK 🔒 V3.7 MAC+PHONE</b><a href="carrefour.html">← Carrefour</a></div>
 <div class="post-box">
-<textarea id="txt" placeholder="Quoi de neuf Chef? Ecris ici..."></textarea>
+<textarea id="txt" placeholder="Quoi de neuf Chef?"></textarea>
 <input type="file" id="file" accept="image/*,video/*" style="display:none">
 <div id="preview"></div>
 <div id="vPreview"></div>
+<div id="timer">🔴 REC 00:00</div>
 <div class="btns">
-<button onclick="openFile()" style="background:#FFD700;color:black">📁 Selfie/Photo/Video</button>
+<button onclick="openFile()" style="background:#FFD700;color:black">📁 Photo/Video</button>
 <button onclick="toggleVoice()" id="vBtn" style="background:#FFD700;color:black">🎙️ Vocal</button>
 <button onclick="doPost()" style="background:white;color:black">Publier 🚀</button>
+</div><div id="msg" class="mac-info">✅ Mode Universel: iPhone / Mac / Android détecté auto</div>
 </div>
-<div id="msg" style="color:#FFD700;margin-top:8px"></div>
-</div>
-<div class="save-info">✅ Sauvegarde auto activée - tes posts restent même après fermeture</div>
 <div id="feed"></div>
-<script>
-var photoData=""; var photoType=""; var vocalData=""; var recorder=null; var chunks=[]; var isRec=false;
 
+<script>
+var photoData=""; var photoType=""; var vocalData=""; var recorder=null; var chunks=[]; var isRec=false; var timerInt=null; var sec=0;
+
+function detectMime(){
+  if(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) return 'audio/webm;codecs=opus';
+  if(MediaRecorder.isTypeSupported('audio/webm')) return 'audio/webm';
+  if(MediaRecorder.isTypeSupported('audio/mp4')) return 'audio/mp4';
+  if(MediaRecorder.isTypeSupported('audio/aac')) return 'audio/aac';
+  return '';
+}
 function openFile(){ document.getElementById('file').click(); }
 document.getElementById('file').onchange=function(e){
-  var f=e.target.files[0]; if(!f) return;
-  photoType=f.type;
-  var reader=new FileReader();
-  reader.onload=function(ev){
-    photoData=ev.target.result;
-    if(f.type.indexOf('video')>-1){ document.getElementById('preview').innerHTML='<video src="'+photoData+'" controls></video><br><b onclick="clearPhoto()" style="color:#ff6666;cursor:pointer">❌ Retirer</b>'; }
-    else { document.getElementById('preview').innerHTML='<img src="'+photoData+'"><br><b onclick="clearPhoto()" style="color:#ff6666;cursor:pointer">❌ Retirer</b>'; }
-  };
-reader.readAsDataURL(f);
+  var f=e.target.files[0]; if(!f) return; photoType=f.type;
+  var r=new FileReader(); r.onload=function(ev){ photoData=ev.target.result;
+    if(f.type.indexOf('video')>-1) document.getElementById('preview').innerHTML='<video src="'+photoData+'" controls></video><br><b onclick="clearPhoto()" style="color:#ff6666">❌ Retirer</b>';
+    else document.getElementById('preview').innerHTML='<img src="'+photoData+'"><br><b onclick="clearPhoto()" style="color:#ff6666">❌ Retirer</b>';
+  }; r.readAsDataURL(f);
 };
 function clearPhoto(){ photoData=""; document.getElementById('preview').innerHTML=""; document.getElementById('file').value=""; }
 
+function startTimer(){ sec=0; document.getElementById('timer').style.display='block';
+  timerInt=setInterval(function(){ sec++; var m=String(Math.floor(sec/60)).padStart(2,'0'); var s=String(sec%60).padStart(2,'0'); document.getElementById('timer').innerText='🔴 REC '+m+':'+s; if(sec>=120) toggleVoice(); },1000);
+}
+function stopTimer(){ clearInterval(timerInt); document.getElementById('timer').style.display='none'; }
+
 function toggleVoice(){
-  if(isRec){ recorder.stop(); return; }
-  navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
-    chunks=[]; recorder=new MediaRecorder(s); isRec=true;
-    document.getElementById('vBtn').innerText='⏹️ Stop'; document.getElementById('vBtn').style.background='red';
-    recorder.ondataavailable=function(e){ chunks.push(e.data); };
+  if(isRec){ if(recorder.state==='recording') recorder.stop(); return; }
+navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    chunks=[]; var mime=detectMime();
+    try{ recorder=new MediaRecorder(stream, mime?{mimeType:mime}:{}); } catch(e){ recorder=new MediaRecorder(stream); }
+    isRec=true; document.getElementById('vBtn').innerText='⏹️ Stop'; document.getElementById('vBtn').style.background='red'; startTimer();
+    document.getElementById('msg').innerText='🎙️ Enregistrement en '+recorder.mimeType+' - Parle Chef!';
+    recorder.ondataavailable=function(e){ if(e.data && e.data.size>0) chunks.push(e.data); };
     recorder.onstop=function(){
-      isRec=false;
-      var blob=new Blob(chunks,{type:'audio/webm'});
-      var reader=new FileReader();
-      reader.onload=function(ev){
-        vocalData=ev.target.result;
-document.getElementById('vPreview').innerHTML='<audio controls src="'+vocalData+'"></audio><br><b onclick="clearVocal()" style="color:#ff6666;cursor:pointer">❌ Retirer vocal</b>';
-      };
-      reader.readAsDataURL(blob);
+      isRec=false; stopTimer();
+      var blob=new Blob(chunks,{type:recorder.mimeType});
+      if(blob.size<500){ document.getElementById('msg').innerText='Vocal trop court!'; return; }
+var r=new FileReader(); r.onload=function(ev){ vocalData=ev.target.result;
+        document.getElementById('vPreview').innerHTML='<audio controls src="'+vocalData+'"></audio><br><b onclick="clearVocal()" style="color:#ff6666">❌ Retirer ('+sec+'s - '+Math.round(blob.size/1000)+'Ko)</b>';
+        document.getElementById('msg').innerText='✅ Vocal OK: '+sec+'s enregistré!';
+      }; r.readAsDataURL(blob);
       document.getElementById('vBtn').innerText='🎙️ Vocal'; document.getElementById('vBtn').style.background='#FFD700';
-      s.getTracks().forEach(function(t){ t.stop(); });
+      stream.getTracks().forEach(function(t){ t.stop(); });
     };
-    recorder.start();
-  }).catch(function(){ alert('Autorise le micro Chef!'); });
+    recorder.start(200);
+  }).catch(function(err){ alert('Micro bloqué sur Mac! Autorise dans Réglages > Confidentialité > Microphone. Erreur: '+err.message); });
 }
 function clearVocal(){ vocalData=""; document.getElementById('vPreview').innerHTML=""; }
 
-function saveFeed()
-{ localStorage.setItem('GMK_FEED_V35', document.getElementById('feed').innerHTML); }
-function loadFeed(){
-  var saved=localStorage.getItem('GMK_FEED_V35');
-  if(saved){ document.getElementById('feed').innerHTML=saved; }
-  else {
-    document.getElementById('feed').innerHTML='<div class="card"><b>Georges-Marie 🔒</b><p>Bienvenue dans GMK-ARROW! Tes messages sont maintenant sauvegardés! ✅</p><div class="interact"><b onclick="doLike(this)">❤️ Like (<span>0</span>)</b><b onclick="doComment(this)">💬 Commenter</b><b onclick="doShare(this)">↗️ Partager</b></div><div class="comments"></div></div>';
-  }
-}
+function saveFeed(){ localStorage.setItem('GMK_FEED_V37', document.getElementById('feed').innerHTML); }
+function loadFeed(){ var s=localStorage.getItem('GMK_FEED_V37')||localStorage.getItem('GMK_FEED_V36')||localStorage.getItem('GMK_FEED_V35'); if(s) document.getElementById('feed').innerHTML=s; }
+
 function doPost(){
   var text=document.getElementById('txt').value;
-  if(text.trim()=='' && photoData=='' && vocalData==''){ alert('Ecris quelque chose Chef!'); return; }
-  var media='';
-  if(photoData){ if(photoType.indexOf('video')>-1) media+='<video src="'+photoData+'" controls></video>'; else media+='<img src="'+photoData+'">'; }
-  if(vocalData) media+='<audio controls src="'+vocalData+'"></audio>';
+  if(text.trim()=='' && photoData=='' && vocalData==''){ alert('Ecris quelque chose!'); return; }
+  var media=''; if(photoData){ if(photoType.indexOf('video')>-1) media+='<video src="'+photoData+'" controls></video>'; else media+='<img src="'+photoData+'">'; }
+if(vocalData) media+='<audio controls src="'+vocalData+'"></audio>';
   var div=document.createElement('div'); div.className='card';
-  div.innerHTML='<b>Georges-Marie 🔒</b><p>'+escapeHtml(text)+'</p>'+media+'<div class="interact"><b onclick="doLike(this)">❤️ Like (<span>0</span>)</b><b onclick="doComment(this)">💬 Commenter</b><b onclick="doShare(this)">↗️ Partager</b></div><div class="comments"></div>';
+  div.innerHTML='<b>Georges-Marie 🔒</b><p>'+text.replace(/</g,'&lt;')+'</p>'+media+'<div class="interact"><b onclick="doLike(this)">❤️ Like (<span>0</span>)</b><b onclick="doComment(this)">💬 Commenter</b></div><div class="comments"></div>';
   var feed=document.getElementById('feed'); feed.insertBefore(div, feed.firstChild);
-document.getElementById('txt').value=''; clearPhoto(); clearVocal();
-  document.getElementById('msg').innerText='Publié et sauvegardé! ✅';
-  saveFeed();
-  window.scrollTo(0,0);
+  document.getElementById('txt').value=''; clearPhoto(); clearVocal(); saveFeed();
 }
-function escapeHtml(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function doLike(el){ var sp=el.querySelector('span'); sp.innerText=parseInt(sp.innerText)+1; saveFeed(); }
-function doComment(el){ var t=prompt('Ton commentaire:'); if(!t) return; var box=el.parentElement.parentElement.querySelector('.comments'); var p=document.createElement('p'); p.style.background='#0a1931'; p.style.padding='8px'; 
-p.style.borderRadius='8px'; p.style.marginTop='8px'; p.innerText='Toi: '+t; box.appendChild(p); saveFeed(); }
-function doShare(el){ var txt=el.parentElement.parentElement.querySelector('p').innerText; if(navigator.share){ navigator.share({text:txt}); } else { alert('Copie: '+txt); } }
+function doComment(el){ var t=prompt('Ton commentaire:'); if(!t) return; var box=el.parentElement.parentElement.querySelector('.comments'); var p=document.createElement('p'); p.style.background='#0a1931'; 
+  p.style.padding='8px'; p.style.borderRadius='8px'; p.innerText='Toi: '+t; box.appendChild(p); saveFeed(); }
 
 loadFeed();
+var mt=detectMime(); document.getElementById('msg').innerText='✅ Mac/Phone détecté: '+ (mt||'auto') +' prêt!';
 </script>
 </body>
 </html>
-
-  
