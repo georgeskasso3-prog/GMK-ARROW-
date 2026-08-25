@@ -3,45 +3,123 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fil GMK V4.2.3 FIX</title>
+<title>Fil GMK V4.3 PRO</title>
 <style>
 body{background:#0a1931;color:#FFD700;font-family:Arial;padding:12px;margin:0}
-.top{background:#000;padding:12px;border-radius:10px;display:flex;justify-content:space-between;margin-bottom:12px}
-.box{background:#0f274e;border:2px solid #FFD700;border-radius:15px;padding:15px}
-textarea{width:100%;height:85px;background:#000;color:#fff;border:1px solid #FFD700;border-radius:10px;padding:12px;font-size:16px;box-sizing:border-box}
-button{padding:13px;border:none;border-radius:25px;font-weight:bold;font-size:14px;margin:4px;width:47%;cursor:pointer}
-#pub{background:#FFD700;color:#000;width:100%;font-size:18px;padding:16px;margin-top:12px}
-.post{background:#000;border:1px solid 
-#FFD700;border-radius:10px;padding:10px;margin-top:12px}
+.top{background:#000;padding:12px;border-radius:10px;display:flex;justify-content:space-between}
+.box{background:#0f274e;border:2px solid #FFD700;border-radius:15px;padding:15px;margin-top:10px}
+textarea{width:100%;height:80px;background:#000;color:#fff;border:1px solid #FFD700;border-radius:10px;padding:10px;box-sizing:border-box}
+button{padding:12px;border:none;border-radius:25px;font-
+weight:bold;margin:4px;cursor:pointer}
+#pub{background:#FFD700;color:#000;width:100%;font-size:18px;padding:15px;margin-top:10px}
+.post{background:#000;border:1px solid #FFD700;border-radius:10px;padding:10px;margin-top:10px}
+#camBox{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:99;flex-direction:column;align-items:center;justify-content:center}
+#camBox video{width:90%;max-width:400px;border-radius:15px}
 </style>
 </head>
 <body>
-<div class="top"><span>← GMK</span><span>Fil GMK V4.2.3 FIX ✅<br><small style="background:#00c853;color:#fff;padding:2px 6px;border-radius:8px">SYNC OK</small></span><span id="c">0 posts</span></div>
+<div class="top"><span>← GMK</span><span>Fil GMK V4.3 PRO ✅</span><span id="c">0 posts</span></div>
 <div class="box">
 <textarea id="t" placeholder="Quoi de neuf Chef?"></textarea>
-<div style="display:flex;flex-wrap:wrap">
-<button style="background:#FFD700" onclick="f.click()">📷 Photo</button>
-<button style="background:#00c853;color:#fff" onclick="f.click()">🎥 Caméra</button>
-<button style="background:#fff" onclick="f.click()">🎞️ Vidéo</button>
-<button style="background:#FFD700" onclick="alert('Vocal V4.3')">🎤 Vocal</button>
+<div>
+<button style="background:#FFD700" onclick="fP.click()">📷 Photo</button>
+<button style="background:#00c853;color:#fff"
+onclick="openCam()">🎥 Caméra</button>
+<button style="background:#fff;color:#000" onclick="fV.click()">🎞️ Vidéo</button>
+<button id="btnVoc" style="background:#FFD700" onclick="toggleVocal()">🎤 Vocal</button>
 </div>
-<input type="file" id="f" accept="image/*,video/*" style="display:none" onchange="hf(this)">
+<input type="file" id="fP" accept="image/*" style="display:none" onchange="hF(this,'image')">
+<input type="file" id="fV" accept="video/*" style="display:none" onchange="hF(this,'video')">
 <div id="pv"></div>
-<button id="pub" onclick="pub()">🚀 Publier sur CLOUD</button>
+<button id="pub" onclick="publier()">🚀 Publier sur CLOUD</button>
 </div>
 <div id="feed"></div>
+<div id="camBox">
+<video id="v" autoplay playsinline></video>
+<div style="margin-top:15px">
+<button style="background:#FFD700;color:#000" onclick="takePhoto()">📸 Capturer</button>
+<button style="background:#fff;color:#000" onclick="closeCam()">✖ Fermer</button>
+</div>
+</div>
 <script>
-let md=null;
-function hf(i){let file=i.files[0];if(!file)return;let r=new FileReader();r.onload=e=>{md=e.target.result;document.getElementById('pv').innerHTML='<img src="'+md+'" style="max-width:100%;border-radius:10px;margin-top:8px">';};r.readAsDataURL(file);}
-function pub(){let txt=document.getElementById('t').value.trim();if(!txt&&!md){alert('Écris quelque chose Chef!');return;}let post={texte:txt,media:md,date:new Date().toISOString()};let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');posts.unshift(post);localStorage.setItem('gmk_posts',JSON.stringify(posts));document.getE
-lementById('t').value='';document.getElementById('pv').innerHTML='';md=null;aff();alert('✅ Publié Chef!');}
-function aff(){let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');document.getElementById('c').innerText=posts.length+' posts';let feed=document.getElementById('feed');feed.innerHTML='';posts.forEach((p,i)=>{let d=document.createElement('div');d.className='post';d.innerHTML='<div>'+(p.texte||'')+'</div>'+(p.media?'<img src="'+p.media+'" style="max-width:100%;margin-top:8px;border-radius:8px">':'')+'<div style="font-size:11px;color:#aaa;margin-top:5px">'+new Date(p.date).toLocaleString()+'</div><button onclick="supp('+i+')" style="background:#ff4444;color:#fff;padding:5px 10px;border-radius:5px;margin-top:6px;width:auto">🗑️ Supprimer</button>';feed.appendChild(d);});}
-function supp(i){if(!confirm('Supprimer ce post?'))return;let 
-posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');posts.splice(i,1);localStorage.setItem('gmk_posts',JSON.stringify(posts));aff();}
-aff();
+let mediaData=null,mediaType=null,stream=null,rec=null,chunks=[];
+function hF(input,type){
+ let file=input.files[0]; if(!file)return;
+ let r=new FileReader();
+ r.onload=e=>{
+   mediaData=e.target.result; mediaType=type;
+   if(type=='image') document.getElementById('pv').innerHTML='<img src="'+mediaData+'" style="max-width:100%;border-radius:10px;margin-top:8px"><br><small>✅ Photo prête</small>';
+   else document.getElementById('pv').innerHTML='<video src="'+mediaData+'" controls style="max-width:100%;border-radius:10px;margin-top:8px"></video><br><small>✅ Vidéo prête</small>';
+ };
+ r.readAsDataURL(file);
+}
+async function openCam(){
+ document.getElementById('camBox').style.display='flex';
+try{
+  stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+  document.getElementById('v').srcObject=stream;
+ }catch(e){alert("Caméra bloquée Chef! Autorise dans Chrome."); closeCam();}
+}
+function closeCam(){document.getElementById('camBox').style.display='none'; if(stream){stream.getTracks().forEach(t=>t.stop()); stream=null;}}
+function takePhoto(){
+ let video=document.getElementById('v');
+ let c=document.createElement('canvas'); c.width=video.videoWidth; c.height=video.videoHeight;
+ c.getContext('2d').drawImage(video,0,0);
+ mediaData=c.toDataURL('image/jpeg'); mediaType='image';
+ document.getElementById('pv').innerHTML='<img src="'+mediaData+'" style="max-width:100%;border-radius:10px"><br><small>✅ Photo capturée</small>';
+closeCam();
+}
+let isRec=false;
+async function toggleVocal(){
+ let btn=document.getElementById('btnVoc');
+ if(!isRec){
+  try{
+   let s=await navigator.mediaDevices.getUserMedia({audio:true});
+   rec=new MediaRecorder(s); chunks=[];
+   rec.ondataavailable=e=>chunks.push(e.data);
+   rec.onstop=()=>{
+    let blob=new Blob(chunks,{type:'audio/webm'});
+    let r=new FileReader(); r.onload=e=>{mediaData=e.target.result; mediaType='audio'; document.getElementById('pv').innerHTML='<audio controls src="'+mediaData+'" style="width:100%"></audio><br><small>✅ Vocal prêt</small>';}; r.readAsDataURL(blob);
+    s.getTracks().forEach(t=>t.stop());
+   };
+   rec.start(); isRec=true; btn.innerText='⏹️ 
+STOP'; btn.style.background='#ff4444'; btn.style.color='#fff';
+  }catch(e){alert('Micro bloqué - autorise le micro');}
+ }else{rec.stop(); isRec=false; btn.innerText='🎤 Vocal'; btn.style.background='#FFD700'; btn.style.color='#000';}
+}
+function publier(){
+ let txt=document.getElementById('t').value.trim();
+ if(!txt&&!mediaData){alert('Écris quelque chose Chef!');return;}
+ let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');
+ posts.unshift({texte:txt,media:mediaData,type:mediaType,date:new Date().toISOString()});
+ localStorage.setItem('gmk_posts',JSON.stringify(posts));
+ document.getElementById('t').value=''; 
+document.getElementById('pv').innerHTML=''; mediaData=null; mediaType=null;
+ afficher(); alert('✅ Publié Chef!');
+}
+function afficher(){
+ let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');
+ document.getElementById('c').innerText=posts.length+' posts';
+ let feed=document.getElementById('feed'); feed.innerHTML='';
+ posts.forEach((p,i)=>{
+  let m='';
+  if(p.media){
+   if(p.type=='image') m='<img src="'+p.media+'" 
+style="max-width:100%;border-radius:8px;margin-top:8px">';
+   else if(p.type=='video') m='<video src="'+p.media+'" controls style="max-width:100%;border-radius:8px;margin-top:8px"></video>';
+   else if(p.type=='audio') m='<audio controls src="'+p.media+'" style="width:100%;margin-top:8px"></audio>';
+   else m='<img src="'+p.media+'" style="max-width:100%">';
+  }
+  let d=document.createElement('div'); d.className='post';
+  d.innerHTML='<div>'+(p.texte||'')+'</div>'+m+'<div style="font-size:11px;color:#aaa;margin-top:5px">'+new Date(p.date).toLocaleString()+'</div><button onclick="supp('+i+')" style="background:#ff4444;color:#fff;padding:6px 12px;border-radius:15px;margin-top:6px;width:auto">🗑️</button>';
+  feed.appendChild(d);
+ });
+}
+function supp(i){if(!confirm('Supprimer?'))return; let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]'); posts.splice(i,1); localStorage.setItem('gmk_posts',JSON.stringify(posts)); afficher();}
+afficher();
 </script>
 </body>
 </html>
 
 
-  
+       
