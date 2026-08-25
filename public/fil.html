@@ -5,17 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Fil GMK V5.6 Clean 60s</title>
 <style>
-*{box-sizing:border-box}body{background:#0a1931;color:#fff;font-family:Arial;margin:0}.top{background:#000;color:#FFD700;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}.box{background:#0f274e;margin:12px;border:2px solid #FFD700;border-radius:16px;padding:14px}textarea{width:100%;background:#000;color:#fff;border:1px solid #333;border-radius:12px;padding:12px;font-size:15px;min-height:80px;outline:none}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.actions button{padding:10px 16px;border-radius:22px;border:none;font-weight:bold;cursor:pointer}.b-photo{background:#FFD700;color:#000}.b-
-cam{background:#00c853;color:#fff}.b-video{background:#2962ff;color:#fff}.b-vocal{background:#ff1744;color:#fff}.b-send{background:#fff;color:#000;margin-left:auto}.preview{margin-top:12px;border-radius:12px;overflow:hidden;display:none}.preview img,.preview video{width:100%;max-height:400px;object-fit:cover}.feed{margin:12px}.card{background:#112a52;border:1px solid #1e3a6a;border-radius:14px;padding:12px;margin-bottom:12px}.card img,.card video{width:100%;border-radius:10px;margin-top:8px}.muted{color:#8aa0c0;font-size:13px}
+*{box-sizing:border-box}body{background:#0a1931;color:#fff;font-family:Arial;margin:0}.top{background:#000;color:#FFD700;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}.box{background:#0f274e;margin:12px;border:2px solid #FFD700;border-radius:16px;padding:14px}textarea{width:100%;background:#000;color:#fff;border:1px solid #333;border-radius:12px;padding:12px;font-size:15px;min-height:80px;outline:none}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.actions button{padding:10px 16px;border-radius:22px;border:none;font-weight:bold;cursor:pointer}.b-
+photo{background:#FFD700;color:#000}.b-cam{background:#00c853;color:#fff}.b-video{background:#2962ff;color:#fff}.b-vocal{background:#ff1744;color:#fff}.b-send{background:#fff;color:#000;margin-left:auto}.preview{margin-top:12px;border-radius:12px;overflow:hidden;display:none}.preview img,.preview video{width:100%;max-height:400px;object-fit:cover}.feed{margin:12px}.card{background:#112a52;border:1px solid #1e3a6a;border-radius:14px;padding:12px;margin-bottom:12px}.card img,.card video{width:100%;border-radius:10px;margin-top:8px}.muted{color:#8aa0c0;font-size:13px}
 </style>
 </head>
 <body>
 <div class="top"><b>⚡ GMK FIL V5.6</b><span id="status" class="muted">Prêt</span></div>
 <div class="box">
-<textarea id="txt" placeholder="Quoi de neuf Chef? Texte, photo, vidéo 60s, vocal..."></textarea>
+<textarea id="txt" placeholder="Quoi de neuf Chef?"></textarea>
 <div class="actions">
-<button class="b-photo" onclick="pickPhoto()">📷 
-Photo</button>
+<button class="b-photo" onclick="pickPhoto()">📷 Photo</button>
 <button class="b-cam" onclick="pickCam()">🎥 Cam</button>
 <button class="b-video" onclick="pickVideo()">🎞️ Vidéo 60s</button>
 <button class="b-vocal" onclick="recVocal()">🎤 Vocal</button>
@@ -29,19 +28,19 @@ Photo</button>
 <input type="file" id="fVideo" accept="video/*" hidden>
 <script>
 let mediaData=null,mediaType=null;
-function setStatus(t){document.getElementById('statu s').textContent=t}
+function setStatus(t){document.getElementById('status').textContent=t}
 function pickPhoto()
 {document.getElementById('fPhoto').click()}
 function pickCam(){let i=document.getElementById('fPhoto');i.setAttribute('capture','environment');i.click()}
 function pickVideo(){document.getElementById('fVideo').click()}
 document.getElementById('fPhoto').addEventListener('change',e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{mediaData=r.result;mediaType='photo';showPreview('<img src="'+mediaData+'">');setStatus('Photo prête')};r.readAsDataURL(f);});
-document.getElementById('fVideo').addEventListener('change',e=>{let f=e.target.files[0];if(!f)return;if(f.size>60*1024*1024){alert('>60MB');return;}let v=document.createElement('video');v.preload='metadata';v.onloadedmetadata=()=>{if(v.duration>62){alert('Trop longue '+Math.round(v.duration)+'s Max 60s');return;}let r=new FileReader();r.onload=()=>{mediaData=r.result;mediaType='video';showPreview('<video src="'+mediaData+'" controls></video>');setStatus('Vidéo 60s 
+document.getElementById('fVideo').addEventListener('change',e=>{let f=e.target.files[0];if(!f)return;if(f.size>60*1024*1024){alert('>60MB');return;}let v=document.createElement('video');v.preload='metadata';v.onloadedmetadata=()=>{if(v.duration>62){alert('Trop longue '+Math.round(v.duration)+'s');return;}let r=new FileReader();r.onload=()=>{mediaData=r.result;mediaType='video';showPreview('<video src="'+mediaData+'" controls></video>');setStatus('Vidéo 60s 
 prête')};r.readAsDataURL(f);};v.src=URL.createObjectURL(f);});
-function showPreview(html){let p=document.getElementById('preview');p.innerHTML=html;p.style.display='block';}
-let rec=null,chunks=[];function recVocal(){if(rec&&rec.state==='recording'){rec.stop();return;}navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{chunks=[];rec=new MediaRecorder(s);rec.ondataavailable=e=>chunks.push(e.data);rec.onstop=()=>{let blob=new Blob(chunks,{type:'audio/webm'});let r=new FileReader();r.onload=()=>{mediaData=r.result;mediaType='vocal';showPreview('<audio controls src="'+mediaData+'"></audio>');setStatus('Vocal prêt')};r.readAsDataURL(blob);};rec.start();setStatus('🔴 REC... reclique stop');let sec=0;let it=setInterval(()=>{sec++;document.getElementById('vocalInfo').style.display='block';document.getElementById('vocalInfo').textContent='🔴 '+sec+'s / 60s';if(sec>=60){rec.stop();clearInterval(it);}if(rec.state!=='recording')clearInterval(it);},1000);}).catch(()=>alert('Micro bloqué'));}
-function publish(){let text=document.getElementById('txt').value.trim();if(!text&&!mediaData){alert('Ajoute texte ou média');return;}let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');posts.unshift({id:Date.now(),text:text,media:mediaData,type:mediaType,date:new Date().toLocaleString()});localStorage.setItem('gmk_posts',JSON.stringify(posts));document.getElementById('txt').value='';mediaData=null;mediaType=null;document.getElementById('preview').style.display='none';document.getElementById('vocalInfo').style.display='none';setStatus('Publié ✅');render();}
-function render(){let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');let f=document.getElementById('feed');if(posts.length===0){f.innerHTML='<div class="muted" style="text-align:center;padding:20px">Aucun post encore</div>';return;}f.innerHTML=posts.map(p=>{let m='';if(p.type==='photo')m='<img src="'+p.media+'">';if(p.type==='video')m='<video src="'+p.media+'" controls></
-video>';if(p.type==='vocal')m='<audio controls src="'+p.media+'" style="width:100%"></audio>';return '<div class="card"><div>'+(p.text||'')+'</div>'+m+'<div class="muted" style="margin-top:8px">'+p.date+'</div></div>';}).join('');}
+function showPreview(h){let p=document.getElementById('preview');p.innerHTML=h;p.style.display='block';}
+let rec=null,chunks=[];function recVocal(){if(rec&&rec.state==='recording'){rec.stop();return;}navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{chunks=[];rec=new MediaRecorder(s);rec.ondataavailable=e=>chunks.push(e.data);rec.onstop=()=>{let b=new Blob(chunks,{type:'audio/webm'});let r=new FileReader();r.onload=()=>{mediaData=r.result;mediaType='vocal';showPreview('<audio controls src="'+mediaData+'"></audio>');setStatus('Vocal prêt')};r.readAsDataURL(b);};rec.start();setStatus('🔴 REC... reclique stop');let sec=0;let it=setInterval(()=>{sec++;document.getElementById('vocalInfo').style.display='block';document.getElementById('vocalInfo').textContent='🔴 '+sec+'s / 60s';if(sec>=60){rec.stop();clearInterval(it);}if(rec.state!=='recording')clearInterval(it);},1000);}).catch(()=>alert('Micro bloqué'));}
+function publish(){let t=document.getElementById('txt').value.trim();if(!t&&!mediaData){alert('Ajoute texte ou média');return;}let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');posts.unshift({id:Date.now(),text:t,media:mediaData,type:mediaType,date:new Date().toLocaleString()});localStorage.setItem('gmk_posts',JSON.stringify(posts));document.getElementById('txt').value='';mediaData=null;mediaType=null;document.getElementById('preview').style.display='none';document.getElementById('vocalInfo').style.display='none';setStatus('Publié ✅');render();}
+function render(){let posts=JSON.parse(localStorage.getItem('gmk_posts')||'[]');let f=document.getElementById('feed');if(posts.length===0){f.innerHTML='<div class="muted" style="text-align:center;padding:20px">Aucun post</div>';return;}f.innerHTML=posts.map(p=>{let m='';if(p.type==='photo')m='<img src="'+p.media+'">';if(p.type==='video')m='<video src="'+p.media+'" controls></video>';if(p.type==='vocal')m='<audio controls 
+src="'+p.media+'" style="width:100%"></audio>';return '<div class="card"><div>'+(p.text||'')+'</div>'+m+'<div class="muted" style="margin-top:8px">'+p.date+'</div></div>';}).join('');}
 render();setStatus('V5.6 Prêt - 60s max');
 </script>
 </body>
