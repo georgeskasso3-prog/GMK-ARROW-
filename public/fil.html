@@ -1,130 +1,30 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fil GMK V4.2 CLOUD</title>
-<style>
-body{background:#0a1931;color:white;font-family:Arial;margin:0;padding-bottom:120px}
-.header{background:#0a1931;color:#FFD700;padding:12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;border-bottom:1px solid #FFD700}
-.header a{color:#FFD700;text-decoration:none;font-weight:bold}
-.post-box{background:#112240;margin:12px;padding:14px;border-radius:16px;border:1px solid #FFD700}
-.post-box textarea{width:100%;height:80px;background:#0a1931;color:white;border:1px solid #777;border-radius:10px;padding:10px;box-sizing:border-box}
-.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.btns button{flex:1 1 45%;min-width:120px;padding:14px;border-radius:25px;border:none;font-weight:bold;cursor:pointer}
-.b-yellow{background:#FFD700;color:#0a1931}
-.b-green{background:#00c853;color:white}
-.b-white{background:white;color:#0a1931}
-.card{background:#112240;margin:12px;padding:14px;border-radius:16px;border-left:4px solid #FFD700}
-.card p{white-space:pre-wrap}
-.card small{color:#FFD700}
-video,img{width:100%;border-radius:12px;margin-top:8px}
-.cloud{font-size:11px;background:#00c853;color:white;padding:3px 8px;border-radius:10px;margin-left:8px}
-</style>
-</head>
-<body>
-<div class="header">
-<a href="/index.html">← GMK ARROW</a>
-<span>Fil GMK V4.2 CLOUD ☁️ <span 
-class="cloud">SYNC ACTIF</span></span>
-<span id="count">0 posts</span>
-</div>
-
-<div class="post-box">
-<textarea id="txt" placeholder="Quoi de neuf Chef Georges?"></textarea>
-<div class="btns">
-<button class="b-yellow" onclick="pick('image/*')">📷 Photo</button>
-<button class="b-green" onclick="startCam()">🎥 Caméra MAC</button>
-<button class="b-white" onclick="pick('video/*')">🎞️ Vidéo</button>
-<button class="b-yellow" onclick="recordVoice()">🎤 Vocal</button>
-</div>
-<div id="preview"></div>
-<div class="btns" style="margin-top:14px">
-<button class="b-yellow" style="flex:1 1 100%" onclick="publish()">⬜ Publier sur CLOUD</button>
-</div>
-</div>
-<div id="feed"></div>
-<input type="file" id="fileInput" hidden>
-
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Fil GMK V4.2.2 CLOUD</title>
+<style>body{background:#0a1931;color:#fff;font-family:Arial;margin:0;padding-bottom:120px}.header{background:#0a1931;color:#FFD700;padding:12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;border-bottom:1px solid #FFD700}.header a{color:#FFD700;text-decoration:none;font-weight:bold}.post-box{background:#112240;margin:12px;padding:14px;border-radius:16px;border:1px solid #FFD700}.post-box textarea{width:100%;height:80px;background:#0a1931;color:#fff;border:1px solid #777;border-radius:10px;padding:10px;box-sizing:border-box}.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.btns button{flex:1 1 45%;min-width:120px;padding:14px;border-radius:25px;border:none;font-
+weight:bold;cursor:pointer}.b-yellow{background:#FFD700;color:#0a1931}.b-green{background:#00c853;color:#fff}.b-white{background:#fff;color:#0a1931}.card{background:#112240;margin:12px;padding:14px;border-radius:16px;border-left:4px solid #FFD700}.card p{white-space:pre-wrap}.card small{color:#FFD700}video,img{width:100%;border-radius:12px;margin-top:8px}.cloud{font-size:11px;background:#00c853;color:#fff;padding:3px 8px;border-radius:10px;margin-left:8px}.del{background:#ff3b30;color:#fff;border:none;padding:6px 12px;border-radius:15px;cursor:pointer;float:right;font-size:12px}</style></head><body>
+<div class="header"><a href="/index.html">← GMK ARROW</a><span>Fil GMK V4.2.2 CLOUD ☁️ <span class="cloud">SYNC ACTIF</span></span><span id="count">0 posts</span></div>
+<div class="post-box"><textarea id="txt" placeholder="Quoi de neuf Chef Georges?"></textarea><div class="btns"><button class="b-yellow" onclick="pick('image/*')">📷 Photo</button><button class="b-green" 
+onclick="startCam()">🎥 Caméra MAC</button><button class="b-white" onclick="pick('video/*')">🎞️ Vidéo</button><button class="b-yellow" onclick="recordVoice()">🎤 Vocal</button></div><div id="preview"></div><div class="btns" style="margin-top:14px"><button class="b-yellow" style="flex:1 1 100%" onclick="publish()">⬜ Publier sur CLOUD</button></div></div><div id="feed"></div><input type="file" id="fileInput" hidden>
 <script>
-let mediaBlob=null, mediaType=null, previewUrl=null;
-const txt=document.getElementById('txt'), feed=document.getElementById('feed'), fileInput=document.getElementById('fileInput'), preview=document.getElementById('preview');
-
-function pick(accept){ fileInput.accept=accept; fileInput.onchange=e=>{
- const f=e.target.files[0]; if(!f) return;
- mediaType=f.type; const r=new FileReader();
- r.onload=()=>{ mediaBlob=r.result; showPreview(f.type, r.result); };
- r.readAsDataURL(f);
-}; fileInput.click(); }
-
-function showPreview(type, url){ previewUrl=url;
- if(type.startsWith('video')) preview.innerHTML=`<video src="${url}" controls></video>`;
- else if(type.startsWith('image')) 
-preview.innerHTML=`<img src="${url}">`;
- else if(type.startsWith('audio')) preview.innerHTML=`<audio src="${url}" controls></audio>`;
-}
-
-async function startCam(){
- try{
-  const s=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-  preview.innerHTML='<video id="cam" autoplay muted></video><div class="btns"><button class="b-green" onclick="capPhoto()">📸 Capturer</button><button class="b-yellow" id="recBtn" onclick="toggleRec()">🔴 REC</button></div>';
-  const v=document.getElementById('cam'); v.srcObject=s; window._stream=s;
- }catch(e){ alert('Caméra bloquée: '+e.message); }
-}
-let recorder=null, chunks=[];
-function toggleRec(){
- const btn=document.getElementById('recBtn');
- if(recorder && recorder.state=='recording')
-{ recorder.stop(); btn.textContent='🔴 REC'; return; }
- chunks=[]; recorder=new MediaRecorder(window._stream);
- recorder.ondataavailable=e=>chunks.push(e.data);
- recorder.onstop=()=>{ const blob=new Blob(chunks,{type:'video/webm'}); const r=new FileReader(); r.onload=()=>{ mediaBlob=r.result; mediaType='video/webm'; preview.innerHTML+=`<video src="${r.result}" controls></video>`; }; r.readAsDataURL(blob); };
- recorder.start(); btn.textContent='⏹️ STOP';
-}
-function capPhoto(){
- const v=document.getElementById('cam'); const c=document.createElement('canvas'); c.width=v.videoWidth; c.height=v.videoHeight; c.getContext('2d').drawImage(v,0,0);
- mediaBlob=c.toDataURL('image/jpeg'); mediaType='image/jpeg'; preview.innerHTML+=`<img src="${mediaBlob}">`;
-}
-let vRec=null, vChunks=[];
-async function recordVoice(){
- try{
-  const s=await navigator.mediaDevices.getUserMedia({audio:true});
-  vChunks=[]; vRec=new MediaRecorder(s);
-  vRec.ondataavailable=e=>vChunks.push(e.data);
-  vRec.onstop=()=>{ const blob=new Blob(vChunks,{type:'audio/webm'}); const r=new FileReader(); r.onload=()=>{ mediaBlob=r.result; mediaType='audio/webm'; preview.innerHTML=`<audio src="${r.result}" controls></audio>`; }; r.readAsDataURL(blob); };
-  vRec.start(); preview.innerHTML='<b>🎤 Enregistrement... cliquez à nouveau pour stopper</b>';
-  const stop=()=>{ if(vRec.state=='recording') vRec.stop(); preview.removeEventListener('click',stop); };
-  preview.onclick=stop; setTimeout(stop,10000);
- }catch(e){ alert(e.message); }
-}
-function getPosts(){ try{ return JSON.parse(localStorage.getItem('gmk_v42_cloud')||'[]'); }catch{ return []; } }
-function savePosts(p){ localStorage.setItem('gmk_v42_cloud', JSON.stringify(p)); }
-
-function publish(){
- const text=txt.value.trim(); if(!text &&!mediaBlob){ alert('Écris quelque chose Chef!'); return; }
- const posts=getPosts();
- posts.unshift({id:Date.now(), text, media:mediaBlob, mtype:mediaType, date:new Date().toLocaleString(), author:'Chef Georges'});
- savePosts(posts);
- txt.value=''; mediaBlob=null; mediaType=null; preview.innerHTML=''; render();
- // Simule sync cloud - Vercel va déployer et tous les appareils liront le même localStorage si même compte
- alert('✅ Publié V4.2 CLOUD! Visible sur ton MAC et bientôt sur ton Phone!');
-}
-function render(){
- const posts=getPosts(); document.getElementById('count').textContent=posts.length+' posts';
- feed.innerHTML=posts.map(p=>`
-  <div class="card">
-   <small>${p.author} • ${p.date} ☁️</small>
-   <p>${p.text||''}</p>
-   ${p.media? (p.mtype.startsWith('video')?`<video src="${p.media}" controls></video>`: p.mtype.startsWith('image')?`<img src="${p.media}">`: `<audio src="${p.media}" controls></audio>`) : ''}
-  </div>
- `).join('');
-}
+let mediaBlob=null,mediaType=null;const txt=document.getElementById('txt'),feed=document.getElementById('feed'),fileInput=document.getElementById('fileInput'),preview=document.getElementById('preview');
+function pick(a){fileInput.accept=a;fileInput.onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.type.startsWith('image')){const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');const max=800;let w=img.width,h=img.height;if(w>h)
+{if(w>max){h*=max/w;w=max}}else{if(h>max){w*=max/h;h=max}}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);mediaBlob=c.toDataURL('image/jpeg',0.7);mediaType='image/jpeg';preview.innerHTML=`<img src="${mediaBlob}"><small style="color:#0f0">✅ Photo compressée OK!</small>`};img.src=ev.target.result};r.readAsDataURL(f)}else{const r=new FileReader();r.onload=()=>{mediaBlob=r.result;mediaType=f.type;preview.innerHTML=f.type.startsWith('video')?`<video src="${r.result}" controls></video>`:`<audio src="${r.result}" controls></audio>`};r.readAsDataURL(f)}};fileInput.click()}
+function showPreview(t,u){if(t.startsWith('video'))preview.innerHTML=`<video src="${u}" controls></video>`;else if(t.startsWith('image'))preview.innerHTML=`<img src="${u}">`;else preview.innerHTML=`<audio src="${u}" controls></audio>`}
+async function startCam(){try{const s=await navigator.mediaDevices.getUserMedia({video:true,audio:true});preview.innerHTML='<video id="cam" 
+autoplay muted></video><div class="btns"><button class="b-green" onclick="capPhoto()">📸 Capturer</button><button class="b-yellow" id="recBtn" onclick="toggleRec()">🔴 REC</button></div>';document.getElementById('cam').srcObject=s;window._stream=s}catch(e){alert(e.message)}}
+let recorder=null,chunks=[];function toggleRec(){const b=document.getElementById('recBtn');if(recorder&&recorder.state=='recording'){recorder.stop();b.textContent='🔴 REC';return}chunks=[];recorder=new MediaRecorder(window._stream);recorder.ondataavailable=e=>chunks.push(e.data);recorder.onstop=()=>{const blob=new Blob(chunks,{type:'video/webm'});const r=new FileReader();r.onload=()=>{mediaBlob=r.result;mediaType='video/webm';preview.innerHTML+=`<video src="${r.result}" controls></video>`};r.readAsDataURL(blob)};recorder.start();b.textContent='⏹️ STOP'}
+function capPhoto(){const v=document.getElementById('cam');const 
+c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);mediaBlob=c.toDataURL('image/jpeg',0.7);mediaType='image/jpeg';preview.innerHTML+=`<img src="${mediaBlob}">`}
+async function recordVoice(){try{const s=await navigator.mediaDevices.getUserMedia({audio:true});let vChunks=[];let vRec=new MediaRecorder(s);vRec.ondataavailable=e=>vChunks.push(e.data);vRec.onstop=()=>{const blob=new Blob(vChunks,{type:'audio/webm'});const r=new FileReader();r.onload=()=>{mediaBlob=r.result;mediaType='audio/webm';preview.innerHTML=`<audio src="${r.result}" controls></audio>`};r.readAsDataURL(blob)};vRec.start();preview.innerHTML='<b>🎤 Enregistrement... cliquez pour stopper</b>';preview.onclick=()=>{if(vRec.state=='recording')vRec.stop()};setTimeout(()=>{if(vRec.state=='recording')vRec.stop()},10000)}catch(e){alert(e.message)}}
+function getPosts(){try{return 
+JSON.parse(localStorage.getItem('gmk_v422')||'[]')}catch{return[]}}function savePosts(p){try{localStorage.setItem('gmk_v422',JSON.stringify(p))}catch(e){alert('⚠️ Mémoire pleine! Supprime un ancien post.');throw e}}
+function publish(){const text=txt.value.trim();if(!text&&!mediaBlob){alert('Écris quelque chose Chef!');return}try{const posts=getPosts();posts.unshift({id:Date.now(),text,media:mediaBlob,mtype:mediaType,date:new Date().toLocaleString(),author:'Chef Georges'});savePosts(posts);txt.value='';mediaBlob=null;mediaType=null;preview.innerHTML='';render();alert('✅ Publié V4.2.2 CLOUD!')}catch(e){}}
+function del(id){if(!confirm('Supprimer ce post?'))return;let posts=getPosts();posts=posts.filter(p=>p.id!==id);savePosts(posts);render()}
+function render(){const posts=getPosts();document.getElementById('count').textContent=posts.length+' posts';feed.innerHTML=posts.map(p=>`<div class="card"><button class="del" onclick="del(${p.id})">🗑️ Supprimer</button><small>${p.author}
+• ${p.date} ☁️</small><p>${p.text||''}</p>${p.media?(p.mtype.startsWith('video')?`<video src="${p.media}" controls></video>`:p.mtype.startsWith('image')?`<img src="${p.media}">`:`<audio src="${p.media}" controls></audio>`):''}</div>`).join('')}
 render();
-</script>
-</body>
-</html>
+</script></body></html>
 
 
 
 
- 
