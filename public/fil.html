@@ -67,7 +67,7 @@ function clearPreview(){photoData=''; videoData=''; vocalData=''; document.getEl
 async function startVocal(){
   const mime=detectMime();
   try{
-   const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:false, autoGainControl:true, channelCount:1}});
+   const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:true}});
     chunks=[]; mediaRecorder=new MediaRecorder(stream, {mimeType:mime});
     mediaRecorder.ondataavailable=e=>chunks.push(e.data);
     mediaRecorder.onstop=()=>{
