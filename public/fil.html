@@ -61,9 +61,7 @@ function handleVideo(input){
   r.onload=e=>{videoData=e.target.result; document.getElementById('preview').innerHTML='<video src="'+videoData+'" controls></video>';};
   r.readAsDataURL(input.files[0]);
 }
-function clearPhoto(){photoData=''; videoData=''; document.getElementById('preview').innerHTML='';}
-function clearVocal(){vocalData='';}
-
+function clearPreview(){photoData=''; videoData=''; vocalData=''; document.getElementById('preview').innerHTML=''; document.getElementById('msg').innerText='✅ Effacé - prêt!';}
 async function startVocal(){
   const mime=detectMime();
   try{
