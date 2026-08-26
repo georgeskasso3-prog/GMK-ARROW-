@@ -65,25 +65,27 @@ function clearPhoto(){photoData=''; videoData=''; document.getElementById('previ
 function clearVocal(){vocalData='';}
 function clearPreview(){photoData=''; videoData=''; vocalData=''; document.getElementById('preview').innerHTML=''; document.getElementById('msg').innerText='✅ Effacé - prêt!';}
 async function startVocal(){
-  const mime=detectMime();
-  try{
-  const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false}});
-    chunks=[]; mediaRecorder=new MediaRecorder(stream, {mimeType:mime});
-    mediaRecorder.ondataavailable=e=>chunks.push(e.data);
-    mediaRecorder.onstop=()=>{
-      const blob=new Blob(chunks,{type:mime});
-      const reader=new FileReader();
-      reader.onloadend=()=>{vocalData=reader.result; document.getElementById('preview').innerHTML='<audio src="'+vocalData+'" controls></audio>';};
-      reader.readAsDataURL(blob);
-      stream.getTracks().forEach(t=>t.stop());
-    };
-    mediaRecorder.start(100);
-    document.getElementById('msg').innerText='🔴 Enregistrement vocal... reclique pour stopper';
-    setTimeout(()=>{if(mediaRecorder.state=='recording'){mediaRecorder.stop(); document.getElementById('msg').innerText='✅ Vocal prêt!';}}, 10000);
-    if(mediaRecorder.state=='recording'){
-      document.getElementById('msg').onclick=()=>{mediaRecorder.stop(); document.getElementById('msg').innerText='✅ Vocal prêt!'; document.getElementById('msg').onclick=null;}
-    }
-  }catch(e){alert('Micro bloqué sur HONOR: autorise le micro dans Chrome > Paramètres du site');}
+ clearVocal(); clearPreview(); document.getElementById('preview').innerHTML='';
+ try{
+  const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+  let mime='audio/webm';
+  if(!MediaRecorder.isTypeSupported(mime)) mime='audio/mp4';
+  let chunks=[];
+  const mediaRecorder=new MediaRecorder(stream, mime?{mimeType:mime}:undefined);
+  mediaRecorder.ondataavailable=e=>{if(e.data && e.data.size>0) chunks.push(e.data)};
+  mediaRecorder.onstop=()=>{
+   const blob=new Blob(chunks,{type:mime||'audio/webm'});
+   const reader=new FileReader();
+   reader.onloadend=()=>{vocalData=reader.result; document.getElementById('preview').innerHTML='<audio controls src="'+vocalData+'"></audio> <button onclick="vocalData=null;document.getElementById(\'preview\').innerHTML=\'\'">❌ Effacer</button>'; 
+  document.getElementById('msg').innerText='✅ Vocal prêt! Clique Publier';};
+   reader.readAsDataURL(blob);
+   stream.getTracks().forEach(t=>t.stop());
+  };
+  mediaRecorder.start();
+  document.getElementById('msg').innerText='🔴 Enregistrement vocal... reclique pour stopper';
+  setTimeout(()=>{if(mediaRecorder.state=='recording') mediaRecorder.stop()},10000);
+  document.getElementById('msg').onclick=()=>{if(mediaRecorder.state=='recording') mediaRecorder.stop()};
+ }catch(e){alert('Micro bloqué: autorise le micro dans Chrome > Paramètres');}
 }
 function publier(){
   const txt=document.getElementById('txt').value;
