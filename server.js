@@ -8,8 +8,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const supabase = createClient(
-  'https://tubbfizgirpkqugbwlvy.supabase.co',
-  process.env.SUPABASE_KEY
+  process.env.NEX_URL || 'https://tubbfizgirpkqugbwlvy.supabase.co',
+  process.env.NEX_KEY
 );
 
 let membres = [{ nom:"Georges Kasso", email:"georgeskasso39@gmail.com", pseudo:"Georges - Marie Kasso", password:"1234" }];
