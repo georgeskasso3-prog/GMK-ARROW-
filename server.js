@@ -7,14 +7,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const supabase = createClient(
-  process.env.NEX_URL || 'https://tubbfizgirpkqugbwlvy.supabase.co',
-  process.env.NEX_KEY
-);
-
+let supabase = null;
+try {
+  const url = process.env.NEX_URL || process.env.SUPABASE_URL || 'https://tubbfizgirpkqugbwlvy.supabase.co';
+  const key = process.env.NEX_KEY || process.env.SUPABASE_KEY;
+  if(url && key) supabase = createClient(url, key);
+  console.log('Supabase:', url? 'URL OK' : 'NO URL', key? 'KEY OK' : 'NO KEY');
+} catch(e){ console.log('Supabase init error', e.message); }
 let membres = [{ nom:"Georges Kasso", email:"georgeskasso39@gmail.com", pseudo:"Georges - Marie Kasso", password:"1234" }];
 
 app.get('/', (req,res)=> res.redirect('/register.html'));
+app.get('/api/health', (req,res)=> res.json({ok:true, hasUrl:!!process.env.NEX_URL, hasKey:!!process.env.NEX_KEY, hasSupabase:!!supabase}));
+
 app.post('/api/login', (req,res)=>{
   const { pseudo, email } = req.body;
   const s = (pseudo||email||"").toLowerCase().trim();
@@ -22,27 +26,36 @@ app.post('/api/login', (req,res)=>{
   if(!u) return res.json({success:false, message:"Non trouve"});
   res.json({success:true, user:u});
 });
-
 app.post('/api/register', (req,res)=>{ membres.push(req.body); res.json({success:true}); });
 
 app.get('/api/posts', async (req,res)=>{
-  const { data } = await supabase.from('posts').select('*').order('created_at',{ascending:false}).limit(100);
-  res.json(data||[]);
+  if(!supabase) return res.json([]);
+  try{
+    const { data, error } = await supabase.from('posts').select('*').order('created_at',{ascending:false}).limit(100);
+    if(error) throw error;
+    res.json(data||[]);
+  }catch(e){ console.log(e); res.json([]); }
 });
+
 app.post('/api/posts', async (req,res)=>{
-  const { pseudo, content, text } = req.body;
-  const finalText = content || text || "";
-  const { data, error } = await supabase.from('posts').insert([{ pseudo: pseudo||'Toi', content: finalText }]).select();
-  if(error) return res.status(500).json(error);
-  res.json(data[0]);
+  if(!supabase) return res.status(500).json({error:"supabase not configured"});
+  try{
+const { pseudo, content, text } = req.body;
+    const finalText = content || text || "";
+    const { data, error } = await supabase.from('posts').insert([{ pseudo: pseudo||'Toi', content: finalText }]).select();
+    if(error) throw error;
+    res.json(data[0]);
+  }catch(e){ res.status(500).json({error:e.message}); }
 });
 
 const upload = multer({ storage: multer.memoryStorage() });
 app.post('/api/upload', upload.single('file'), async (req,res)=>{
+  if(!supabase) return res.status(500).json({success:false, error:"supabase not configured"});
   try{
     if(!req.file) return res.status(400).json({success:false});
     const ext = path.extname(req.file.originalname);
-    const fileName = Date.now()+'-'+Math.random().toString(36).substring(7)+ext;
+    const fileName = Date.now()
++'-'+Math.random().toString(36).substring(7)+ext;
     const { error: upErr } = await supabase.storage.from('gmk-medias').upload(fileName, req.file.buffer, { contentType: req.file.mimetype, upsert:true });
     if(upErr) throw upErr;
     const { data:{ publicUrl } } = supabase.storage.from('gmk-medias').getPublicUrl(fileName);
@@ -50,13 +63,7 @@ app.post('/api/upload', upload.single('file'), async (req,res)=>{
     const { data, error } = await supabase.from('posts').insert([{ pseudo: pseudo||'Toi', content: content||'', media_url: publicUrl, media_type: req.file.mimetype.startsWith('image')?'image':'video' }]).select();
     if(error) throw error;
     res.json({success:true, post: data[0], url: publicUrl});
-  }catch(e){ res.status(500).json({success:false, error:e.message}); }
+  }catch(e){ console.log(e); res.status(500).json({success:false, error:e.message}); }
 });
 
 module.exports = app;
-
-
-
-
-
-
